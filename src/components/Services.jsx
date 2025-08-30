@@ -44,12 +44,12 @@ const handleMouseMove = (e) => {
 
   return (
     <section id="services" className="min-h-dvh w-screen bg-black text-blue-50">
-        <div className='flex size-full flex-col items-center py-10 pb-24'>
+        <div className='flex size-full flex-col items-center py-10 '>
             <p className='font-general text-sm uppercase md:text-[10px]'>
                 Discover What We Can Build Together
             </p>
 
-            <div className='relative size-full'>
+            <div className='relative w-full'>
                 <AnimatedTitle
                     title="Your Gateway to Immersion"
                     sectionId="#services"
@@ -65,7 +65,7 @@ const handleMouseMove = (e) => {
                                 onMouseUp={handleMouseLeave}
                                 onMouseEnter={handleMouseLeave}
                                 onMouseMove={handleMouseMove}
-                                src='/img/entrance.webp'
+                                src='/img/entrance.png'
                                 alt="entrance"
                                 className='object-contain'
                             />
@@ -98,22 +98,43 @@ const handleMouseMove = (e) => {
                 </defs>
                 </svg>
                 </div>
-            </div>
-
-            <div className = "-mt-80 flex w-full justify-center md:-mt-64 md:me-44 md:justify-end">
-                <div className="flex h-full w-fit w-fit flex-col items-center md:items-start">
-                    <p className="mt-3 max-w-sm text-center font-circular-web text-violet-50 md:text-start">
-                        It has never been easier to bring your vision to life. Get in touch and let's bring your idea into reality!
-                    </p>
-
-                    <Button 
-                        id='get-in-touch'
-                        title='Get In Touch!'
-                        containerClass='mt-5 bg-blue-50'
-                    />
-
+                
+                {/*flex-row of three services offered by company*/}
+                <div className="flex w-full flex-col items-center pb-30 -mt-80">
+                    <div className="flex flex-col lg:flex-row md:flex-col sm:flex-col items-center justify-center gap-6 sm:gap-6 mb-6 lg:mt-0 md:-mt-80 sm:-mt-80">
+                        <AnimatedTitle
+                            title="XR"
+                            sectionId="#xr"
+                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10'
+                        />
+                        <div className="w-6 h-0.5 sm:w-0.5 h-20 border-t-2 sm:border-t-0 sm:border-l-2 border-blue-300 sm:mx-2" />
+                        <AnimatedTitle
+                            title="VR"
+                            sectionId="#vr"
+                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10'
+                        />                        
+                        <div className="w-6 h-0.5 sm:w-0.5 h-20 border-t-2 sm:border-t-0 sm:border-l-2 border-blue-300 sm:mx-2" />
+                        <AnimatedTitle
+                            title="Deployment"
+                            sectionId="#deployment"
+                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10'
+                        />                        
+                    </div>
+                    
+                    {/* Paragraph and button section */}
+                    <div className="flex w-full justify-center md:me-44 md:justify-end">
+                        <div className="flex h-full w-fit flex-col items-center md:items-start">
+                            <p className="mt-3 max-w-sm text-center font-circular-web text-violet-50 md:text-start">
+                                It has never been easier to bring your vision to life. Get in touch and let's bring your idea into reality!
+                            </p>
+                            <Button 
+                                id='get-in-touch'
+                                title='Get In Touch!'
+                                containerClass='mt-5 bg-blue-50'
+                            />
+                        </div>
+                    </div>
                 </div>
-
             </div>
         </div>
     </section>
