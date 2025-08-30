@@ -6,7 +6,7 @@ import { useWindowScroll } from 'react-use';
 
 import Button from "./Button.jsx";
 
-const navItems = ['About', 'Services', 'Projects', 'Testimonials'];
+const navItems = ['About', 'Projects', 'Services', 'Testimonials'];
 
 const Navbar = () => {
     const navigate = useNavigate();

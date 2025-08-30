@@ -144,6 +144,11 @@ body {
     .opaque-element {
     opacity: 1; /* Fully visible */
   }
+  /* This targets only the line wrapper inside this AnimatedTitle instance */
+.feature-title-override .flex-center {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
 
   .transparent-element {
     opacity: 0; /* Completely invisible */

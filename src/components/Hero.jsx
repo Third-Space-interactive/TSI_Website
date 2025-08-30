@@ -126,7 +126,7 @@ const hero = () => {
                     onLoadedData={handleVideoLoad}
                 />
             </div> 
-            <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-100" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+            <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
                  <b>a</b>rchviz
             </h1>
 
