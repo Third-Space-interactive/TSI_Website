@@ -105,19 +105,19 @@ const handleMouseMove = (e) => {
                         <AnimatedTitle
                             title="XR"
                             sectionId="#xr"
-                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10'
+                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10 !text-[#AE62FF]'
                         />
                         <div className="w-6 h-0.5 sm:w-0.5 h-20 border-t-2 sm:border-t-0 sm:border-l-2 border-blue-300 sm:mx-2" />
                         <AnimatedTitle
                             title="VR"
                             sectionId="#vr"
-                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10'
+                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10 !text-[#E74CFF]'
                         />                        
                         <div className="w-6 h-0.5 sm:w-0.5 h-20 border-t-2 sm:border-t-0 sm:border-l-2 border-blue-300 sm:mx-2" />
                         <AnimatedTitle
                             title="Deployment"
                             sectionId="#deployment"
-                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10'
+                            containerClass='mt-5 pointer-events-none mix-blend-difference relative z-10 !text-[#6C43FF]'
                         />                        
                     </div>
                     

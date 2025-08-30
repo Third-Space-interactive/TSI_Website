@@ -3,6 +3,7 @@ import Hero from './components/Hero.jsx'
 import Navbar from './components/Navbar.jsx'
 import Services from './components/Services.jsx'
 import Projects from './components/Projects.jsx'
+import Testimonials from './components/Testimonials.jsx'
 import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
 
@@ -14,6 +15,7 @@ const App = () => {
         <About/>
         <Projects/>
         <Services/>
+        <Testimonials/>
         <Contact />
         <Footer />
     </main>

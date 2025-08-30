@@ -141,6 +141,17 @@ body {
   .contact-clip-path-2 {
     clip-path: polygon(29% 15%, 85% 30%, 50% 100%, 10% 64%);
   }
+    .opaque-element {
+    opacity: 1; /* Fully visible */
+  }
+
+  .transparent-element {
+    opacity: 0; /* Completely invisible */
+  }
+
+  .semi-transparent-element {
+    opacity: 0.90; /* 50% visible */
+  }
 }
 
 .indicator-line {
