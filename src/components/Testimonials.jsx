@@ -149,7 +149,7 @@ const FeedbackCard = ({
 
 const Testimonials = () => {
   return (
-    <div className="relative rounded-lg py-24 text-blue-50 sm:overflow-hidden">
+    <div id="testimonials" className="relative rounded-lg py-24 text-blue-50 sm:overflow-hidden">
       <div className="relative rounded-lg py-24 text-blue-50 sm:overflow-hidden">
         <motion.div 
           variants={textVariant()}

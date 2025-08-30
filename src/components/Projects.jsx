@@ -61,7 +61,7 @@ const Projects = () => (
           }
           description="1700 Spot is an interactive, real-time platform that gamifies community consultation be enabling residents to collaboratively visualize, and shape their neighbourhoods using immersive 3D experiences"
           isComingSoon={false}
-          projectUrl="https://arkounmerchant.com/projects/Russell-Heights-Hub"
+          projectUrl="/project/1700-spot"
           isVideo={true}
         />
       </BentoTilt>
