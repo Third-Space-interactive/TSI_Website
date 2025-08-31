@@ -1,10 +1,54 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { TiLocationArrow } from "react-icons/ti";
 
-const BentoCard = ({ src, title, description, isComingSoon, projectUrl, isVideo = true }) => {
+{/* Usage examples for bento card component
+// Standard project card with navigation
+<BentoCard 
+  src="video.mp4" 
+  title="My Project" 
+  description="Cool project"
+  projectUrl="/projects/my-project"
+/>
+
+// Coming soon card
+<BentoCard 
+  src="video.mp4" 
+  title="Future Project" 
+  isComingSoon={true}
+/>
+
+// Static card with no button
+<BentoCard 
+  src="image.jpg" 
+  title="Static Content" 
+  description="Just a display card"
+  showButton={false}
+  isVideo={false}
+/>
+
+// External link (opens in same tab)
+<BentoCard 
+  src="video.mp4" 
+  title="External Link" 
+  projectUrl="https://example.com"
+/>
+*/}
+
+
+const BentoCard = ({ 
+  src, 
+  title, 
+  description, 
+  isComingSoon, 
+  projectUrl, 
+  isVideo = true,
+  showButton = true // New prop to control button visibility
+}) => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [hoverOpacity, setHoverOpacity] = useState(0);
   const hoverButtonRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleMouseMove = (event) => {
     if (!hoverButtonRef.current) return;
@@ -19,10 +63,27 @@ const BentoCard = ({ src, title, description, isComingSoon, projectUrl, isVideo 
   const handleMouseEnter = () => setHoverOpacity(1);
   const handleMouseLeave = () => setHoverOpacity(0);
 
+  const handleNavigation = () => {
+    if (projectUrl && !isComingSoon) {
+      // Check if it's an external URL or internal route
+      if (projectUrl.startsWith('http') || projectUrl.startsWith('//')) {
+        // External URL - open in same tab
+        window.location.href = projectUrl;
+      } else {
+        // Internal route - use React Router and scroll to top
+        navigate(projectUrl);
+        // Scroll to top after navigation
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  };
+
   const buttonLabel = isComingSoon ? "coming soon" : "see project";
   const buttonTextColor = isComingSoon ? "text-white/20" : "text-white";
   const buttonBg = isComingSoon ? "bg-black" : "bg-blue-600 hover:bg-blue-700";
-  const buttonCursor = isComingSoon ? "cursor-pointer" : "cursor-pointer";
+  const buttonCursor = isComingSoon ? "cursor-default" : "cursor-pointer";
 
   const buttonContent = (
     <>
@@ -59,32 +120,24 @@ const BentoCard = ({ src, title, description, isComingSoon, projectUrl, isVideo 
       )}
       
       <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-50">
-        {/* Button moved to top right */}
-        <div className="absolute top-5 right-5 z-20">
-          <div
-            ref={hoverButtonRef}
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className={`border-hsla relative flex w-fit items-center gap-1 overflow-hidden rounded-full px-5 py-2 text-xs uppercase ${buttonBg} ${buttonCursor}`}
-            style={{ pointerEvents: isComingSoon ? "none" : "auto" }}
-          >
-            {isComingSoon ? (
-              buttonContent
-            ) : (
-              <a
-                href={projectUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1"
-                style={{ textDecoration: "none" }}
-              >
-                {buttonContent}
-              </a>
-            )}
+        {/* Conditionally render button */}
+        {showButton && (
+          <div className="absolute top-5 right-5 z-20">
+            <div
+              ref={hoverButtonRef}
+              onMouseMove={handleMouseMove}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleNavigation}
+              className={`border-hsla relative flex w-fit items-center gap-1 overflow-hidden rounded-full px-5 py-2 text-xs uppercase ${buttonBg} ${buttonCursor}`}
+              style={{ pointerEvents: isComingSoon ? "none" : "auto" }}
+            >
+              {buttonContent}
+            </div>
           </div>
-        </div>
-        {/* Card content below */}
+        )}
+        
+        {/* Card content */}
         <div>
           <h1 className="bento-title special-font" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
             {title}
