@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/all";
 import { TiLocationArrow } from "react-icons/ti";
 import BentoCard from "./BentoCard";
 import { BentoTilt } from "./Projects";
-import Button from "./button";
+import Button from "./Button.jsx";
 import AnimatedTitle from "./AnimatedTitle";
 
 gsap.registerPlugin(ScrollTrigger);
