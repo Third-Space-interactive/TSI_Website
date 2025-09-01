@@ -28,7 +28,7 @@ const projectData = {
         title: "Interactive Design Annotations",
         description: "",
         isVideo: true,
-        showButton:false
+        showButton:false,
       },
       {
         src: "/videos/Russell-Heights/rh_features-3.mp4", 

@@ -249,6 +249,7 @@ const BentoCard = ({
               src={src}
               loop
               muted
+              playsInline
               autoPlay={useHoverEffect ? showFullMedia : true}
               className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
                 useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
@@ -275,6 +276,7 @@ const BentoCard = ({
               src={src}
               loop
               muted
+              playsInline
               autoPlay={false}
               className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
             />
@@ -312,6 +314,7 @@ const BentoCard = ({
               src={src}
               loop
               muted
+              playsInline
               autoPlay={false}
               className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
             />
