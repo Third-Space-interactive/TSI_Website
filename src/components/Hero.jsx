@@ -2,7 +2,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 import { useEffect, useRef, useState } from "react";
-import Button from "./button.jsx";
+import Button from "./Button.jsx";
 import { TiLocation, TiLocationArrow } from "react-icons/ti";
 import { ScrollTrigger } from "gsap/all";
 
