@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TiLocationArrow } from "react-icons/ti";
+import gsap from "gsap";
 
 {/* Usage examples for bento card component
 // Standard project card with navigation
@@ -27,6 +28,18 @@ import { TiLocationArrow } from "react-icons/ti";
   isVideo={false}
 />
 
+// Static card with hover effect, logo, and animation
+<BentoCard 
+  src="video.mp4" 
+  title="Interactive Content" 
+  description="Hover to see animation"
+  showButton={false}
+  isVideo={true}
+  logoSrc="/img/logo-small.png"
+  useHoverEffect={true}
+  idleAnimation={1} // 1=rotate, 2=float, 3=wiggle, 4=pulse, 5=bounce
+/>
+
 // External link (opens in same tab)
 <BentoCard 
   src="video.mp4" 
@@ -35,7 +48,6 @@ import { TiLocationArrow } from "react-icons/ti";
 />
 */}
 
-
 const BentoCard = ({ 
   src, 
   title, 
@@ -43,12 +55,127 @@ const BentoCard = ({
   isComingSoon, 
   projectUrl, 
   isVideo = true,
-  showButton = true // New prop to control button visibility
+  showButton = true,
+  logoSrc, // Small logo/icon to show initially
+  useHoverEffect = false, // Enable the new hover effect
+  idleAnimation = 0 // Animation type: 0=none, 1=rotate, 2=float, 3=wiggle, 4=pulse, 5=bounce
 }) => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [hoverOpacity, setHoverOpacity] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const hoverButtonRef = useRef(null);
+  const cardRef = useRef(null);
+  const logoRef = useRef(null);
+  const animationRef = useRef(null); // Store the animation reference
   const navigate = useNavigate();
+
+  // Intersection Observer for mobile scroll detection
+  useEffect(() => {
+    if (!useHoverEffect || !cardRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting && entry.intersectionRatio > 0.5);
+      },
+      { threshold: [0, 0.5, 1] }
+    );
+
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [useHoverEffect]);
+
+  // Function to create and start the idle animation
+  const startIdleAnimation = () => {
+    if (!logoRef.current || !idleAnimation || idleAnimation === 0) return;
+
+    // Kill existing animation if it exists
+    if (animationRef.current) {
+      animationRef.current.kill();
+      animationRef.current = null;
+    }
+
+    switch (idleAnimation) {
+      case 1: // Rotate
+        animationRef.current = gsap.to(logoRef.current, {
+          rotation: 360,
+          duration: 4,
+          ease: "none",
+          repeat: -1
+        });
+        break;
+      
+      case 2: // Float
+        animationRef.current = gsap.to(logoRef.current, {
+          y: -10,
+          duration: 2,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+        break;
+      
+      case 3: // Wiggle (rotate left and right)
+        animationRef.current = gsap.to(logoRef.current, {
+          rotation: 15,
+          duration: 1.5,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+        break;
+      
+      case 4: // Pulse
+        animationRef.current = gsap.to(logoRef.current, {
+          scale: 1.1,
+          duration: 1.5,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+        break;
+      
+      case 5: // Bounce
+        animationRef.current = gsap.to(logoRef.current, {
+          y: -15,
+          duration: 0.6,
+          ease: "bounce.out",
+          repeat: -1,
+          repeatDelay: 2
+        });
+        break;
+      
+      default:
+        break;
+    }
+  };
+
+  // GSAP Idle Animations - start animation when component mounts
+  useEffect(() => {
+    startIdleAnimation();
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.kill();
+        animationRef.current = null;
+      }
+    };
+  }, [idleAnimation]);
+
+  // Determine if we should show the full media (desktop hover or mobile in view)
+  const showFullMedia = useHoverEffect && (isHovered || (window.innerWidth <= 768 && isInView));
+
+  // Restart animation when logo becomes visible again
+  useEffect(() => {
+    if (useHoverEffect && logoSrc && !showFullMedia && logoRef.current) {
+      // Small delay to ensure the element is fully rendered
+      const timeoutId = setTimeout(() => {
+        startIdleAnimation();
+      }, 50);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [showFullMedia, idleAnimation, logoSrc, useHoverEffect]);
 
   const handleMouseMove = (event) => {
     if (!hoverButtonRef.current) return;
@@ -60,8 +187,15 @@ const BentoCard = ({
     });
   };
 
-  const handleMouseEnter = () => setHoverOpacity(1);
-  const handleMouseLeave = () => setHoverOpacity(0);
+  const handleMouseEnter = () => {
+    setHoverOpacity(1);
+    if (useHoverEffect) setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setHoverOpacity(0);
+    if (useHoverEffect) setIsHovered(false);
+  };
 
   const handleNavigation = () => {
     if (projectUrl && !isComingSoon) {
@@ -101,22 +235,97 @@ const BentoCard = ({
   );
 
   return (
-    <div className="relative size-full">
-      {/* Conditional rendering for video or image */}
-      {isVideo ? (
-        <video
-          src={src}
-          loop
-          muted
-          autoPlay
-          className="absolute left-0 top-0 size-full object-cover object-center"
-        />
-      ) : (
-        <img
-          src={src}
-          alt={title}
-          className="absolute left-0 top-0 size-full object-cover object-center"
-        />
+    <div 
+      ref={cardRef}
+      className="relative size-full overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Background Media - only show when not using hover effect or when hovered/in view */}
+      {(!useHoverEffect || showFullMedia) && (
+        <>
+          {isVideo ? (
+            <video
+              src={src}
+              loop
+              muted
+              autoPlay={useHoverEffect ? showFullMedia : true}
+              className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
+                useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
+              }`}
+            />
+          ) : (
+            <img
+              src={src}
+              alt={title}
+              className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
+                useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
+              }`}
+            />
+          )}
+        </>
+      )}
+
+      {/* Blurred Background with Grey-Black Gradient - only show when using hover effect and not hovered/in view */}
+      {useHoverEffect && !showFullMedia && (
+        <div className="absolute inset-0">
+          {/* Blurred background media */}
+          {isVideo ? (
+            <video
+              src={src}
+              loop
+              muted
+              autoPlay={false}
+              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
+            />
+          ) : (
+            <img
+              src={src}
+              alt={title}
+              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
+            />
+          )}
+          
+          {/* Grey-black gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-800/90" />
+        </div>
+      )}
+
+      {/* Logo/Icon - only show when using hover effect and not hovered/in view */}
+      {useHoverEffect && logoSrc && !showFullMedia && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <img
+            ref={logoRef}
+            src={logoSrc}
+            alt={`${title} logo`}
+            className="w-16 h-16 md:w-20 md:h-20 object-contain opacity-90 transition-opacity duration-300"
+          />
+        </div>
+      )}
+
+      {/* Default blurred background for hover effect when no logo provided */}
+      {useHoverEffect && !logoSrc && !showFullMedia && (
+        <div className="absolute inset-0">
+          {/* Blurred background media */}
+          {isVideo ? (
+            <video
+              src={src}
+              loop
+              muted
+              autoPlay={false}
+              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
+            />
+          ) : (
+            <img
+              src={src}
+              alt={title}
+              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
+            />
+          )}
+          
+          {/* Grey-black gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-800/90" />
+        </div>
       )}
       
       <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-50">
@@ -138,7 +347,7 @@ const BentoCard = ({
         )}
         
         {/* Card content */}
-        <div>
+        <div className="transition-all duration-500">
           <h1 className="bento-title special-font" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
             {title}
           </h1>
@@ -149,6 +358,13 @@ const BentoCard = ({
           )}
         </div>
       </div>
+
+      {/* Overlay for better text readability when media is showing */}
+      {(!useHoverEffect || showFullMedia) && (
+        <div className={`absolute inset-0 bg-black/30 transition-opacity duration-500 ${
+          useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
+        }`} />
+      )}
     </div>
   );
 };

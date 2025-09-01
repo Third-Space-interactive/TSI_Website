@@ -63,13 +63,14 @@ const Projects = () => (
           isComingSoon={false}
           projectUrl="/project/1700-spot"
           isVideo={true}
+          useHoverEffect={false}
         />
       </BentoTilt>
 
       <div className="grid h-[135vh] w-full grid-cols-2 grid-rows-3 gap-7">
         <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2">
           <BentoCard
-            src="videos/shoquba-1.mp4"
+            src="videos/hero-3.mp4"
             title={
               <>
                 Shoquba
@@ -78,12 +79,13 @@ const Projects = () => (
             description="Shoquba is a real-estate platform allowing users to choose and customize their retail spaces before its built - all within a fully interactive 3D environment."
             isComingSoon
             isVideo={true}
+            useHoverEffect={false}
           />
         </BentoTilt>
 
         <BentoTilt className="bento-tilt_1 row-span-1 ms-32 md:col-span-1 md:ms-0">
           <BentoCard
-            src="videos/feature-3.mp4"
+            src="videos/hero-2.mp4"
             title={
               <>
                 Project ReVamp
@@ -92,6 +94,7 @@ const Projects = () => (
             description="A case-study for a long-term care facility in Ottawa, Canada - allowing residents to explore and customize their living spaces + amenities before its built."
             isComingSoon
             isVideo={true}
+            useHoverEffect={false}
           />
         </BentoTilt>
 

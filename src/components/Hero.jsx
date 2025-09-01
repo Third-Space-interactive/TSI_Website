@@ -127,12 +127,12 @@ const hero = () => {
                 />
             </div> 
             <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
-                 <b>a</b>rchviz
+                 archviz
             </h1>
 
             <div className="absolute left-0 top-0 z-40 size-full">
                 <div className="mt-24 px-5 sm:px-10">
-                    <h1 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}><b>T</b>hird Sp<b>a</b>ce Inter<b>a</b>ctive</h1>
+                    <h1 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>third Space Interactive</h1>
                     <p className="mb-5 max-w-64 font-robert-regular text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>Where game-engine visualization meets architectural realization</p>
 
                     <Button id="book-demo" title="Book a Demo" 
@@ -145,7 +145,7 @@ const hero = () => {
             </div>
         </div>
         <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
-             <b>a</b>rchviz
+             archviz
         </h1>
     </div>
   )
