@@ -3,51 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { TiLocationArrow } from "react-icons/ti";
 import gsap from "gsap";
 
-{/* Usage examples for bento card component
-// Standard project card with navigation
-<BentoCard 
-  src="video.mp4" 
-  title="My Project" 
-  description="Cool project"
-  projectUrl="/projects/my-project"
-/>
-
-// Coming soon card
-<BentoCard 
-  src="video.mp4" 
-  title="Future Project" 
-  isComingSoon={true}
-/>
-
-// Static card with no button
-<BentoCard 
-  src="image.jpg" 
-  title="Static Content" 
-  description="Just a display card"
-  showButton={false}
-  isVideo={false}
-/>
-
-// Static card with hover effect, logo, and animation
-<BentoCard 
-  src="video.mp4" 
-  title="Interactive Content" 
-  description="Hover to see animation"
-  showButton={false}
-  isVideo={true}
-  logoSrc="/img/logo-small.png"
-  useHoverEffect={true}
-  idleAnimation={1} // 1=rotate, 2=float, 3=wiggle, 4=pulse, 5=bounce
-/>
-
-// External link (opens in same tab)
-<BentoCard 
-  src="video.mp4" 
-  title="External Link" 
-  projectUrl="https://example.com"
-/>
-*/}
-
 const BentoCard = ({ 
   src, 
   title, 
@@ -56,40 +11,64 @@ const BentoCard = ({
   projectUrl, 
   isVideo = true,
   showButton = true,
-  logoSrc, // Small logo/icon to show initially
-  useHoverEffect = false, // Enable the new hover effect
-  idleAnimation = 0 // Animation type: 0=none, 1=rotate, 2=float, 3=wiggle, 4=pulse, 5=bounce
+  logoSrc,
+  useHoverEffect = false,
+  idleAnimation = 0,
+  posterSrc // Add poster prop for video thumbnail
 }) => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [hoverOpacity, setHoverOpacity] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const hoverButtonRef = useRef(null);
   const cardRef = useRef(null);
   const logoRef = useRef(null);
-  const animationRef = useRef(null); // Store the animation reference
+  const animationRef = useRef(null);
+  const videoRef = useRef(null);
   const navigate = useNavigate();
 
-  // Intersection Observer for mobile scroll detection
+  // Detect mobile devices
   useEffect(() => {
-    if (!useHoverEffect || !cardRef.current) return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Intersection Observer for mobile scroll detection and lazy loading
+  useEffect(() => {
+    if (!cardRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting && entry.intersectionRatio > 0.5);
+        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.3;
+        
+        if (useHoverEffect) {
+          setIsInView(isVisible && entry.intersectionRatio > 0.5);
+        }
+        
+        // Lazy load video on mobile when card becomes visible
+        if (isVisible && isMobile && isVideo && videoRef.current && !videoLoaded) {
+          videoRef.current.load(); // Trigger video loading
+          setVideoLoaded(true);
+        }
       },
-      { threshold: [0, 0.5, 1] }
+      { threshold: [0, 0.3, 0.5, 1] }
     );
 
     observer.observe(cardRef.current);
     return () => observer.disconnect();
-  }, [useHoverEffect]);
+  }, [useHoverEffect, isMobile, isVideo, videoLoaded]);
 
   // Function to create and start the idle animation
   const startIdleAnimation = () => {
     if (!logoRef.current || !idleAnimation || idleAnimation === 0) return;
 
-    // Kill existing animation if it exists
     if (animationRef.current) {
       animationRef.current.kill();
       animationRef.current = null;
@@ -115,7 +94,7 @@ const BentoCard = ({
         });
         break;
       
-      case 3: // Wiggle (rotate left and right)
+      case 3: // Wiggle
         animationRef.current = gsap.to(logoRef.current, {
           rotation: 15,
           duration: 1.5,
@@ -150,10 +129,8 @@ const BentoCard = ({
     }
   };
 
-  // GSAP Idle Animations - start animation when component mounts
   useEffect(() => {
     startIdleAnimation();
-
     return () => {
       if (animationRef.current) {
         animationRef.current.kill();
@@ -162,17 +139,13 @@ const BentoCard = ({
     };
   }, [idleAnimation]);
 
-  // Determine if we should show the full media (desktop hover or mobile in view)
-  const showFullMedia = useHoverEffect && (isHovered || (window.innerWidth <= 768 && isInView));
+  const showFullMedia = useHoverEffect && (isHovered || (isMobile && isInView));
 
-  // Restart animation when logo becomes visible again
   useEffect(() => {
     if (useHoverEffect && logoSrc && !showFullMedia && logoRef.current) {
-      // Small delay to ensure the element is fully rendered
       const timeoutId = setTimeout(() => {
         startIdleAnimation();
       }, 50);
-
       return () => clearTimeout(timeoutId);
     }
   }, [showFullMedia, idleAnimation, logoSrc, useHoverEffect]);
@@ -199,14 +172,10 @@ const BentoCard = ({
 
   const handleNavigation = () => {
     if (projectUrl && !isComingSoon) {
-      // Check if it's an external URL or internal route
       if (projectUrl.startsWith('http') || projectUrl.startsWith('//')) {
-        // External URL - open in same tab
         window.location.href = projectUrl;
       } else {
-        // Internal route - use React Router and scroll to top
         navigate(projectUrl);
-        // Scroll to top after navigation
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 100);
@@ -221,7 +190,6 @@ const BentoCard = ({
 
   const buttonContent = (
     <>
-      {/* Radial gradient hover effect */}
       <div
         className={`pointer-events-none absolute -inset-px transition duration-300`}
         style={{
@@ -234,6 +202,9 @@ const BentoCard = ({
     </>
   );
 
+  // Generate poster source if not provided
+  const effectivePosterSrc = posterSrc || (isVideo ? src.replace('.mp4', '-poster.jpg') : null);
+
   return (
     <div 
       ref={cardRef}
@@ -241,24 +212,36 @@ const BentoCard = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Background Media - only show when not using hover effect or when hovered/in view */}
+      {/* Background Media */}
       {(!useHoverEffect || showFullMedia) && (
         <>
           {isVideo ? (
             <video
+              ref={videoRef}
               src={src}
+              poster={effectivePosterSrc}
               loop
               muted
               playsInline
-              autoPlay={useHoverEffect ? showFullMedia : true}
+              preload={isMobile ? "none" : "metadata"} // Don't preload on mobile
+              autoPlay={!isMobile && (useHoverEffect ? showFullMedia : true)}
               className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
                 useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
               }`}
+              onCanPlay={() => {
+                // Auto play when video can play on mobile
+                if (isMobile && showFullMedia && videoRef.current) {
+                  videoRef.current.play().catch(() => {
+                    // Handle autoplay restrictions
+                  });
+                }
+              }}
             />
           ) : (
             <img
               src={src}
               alt={title}
+              loading="lazy" // Lazy load images
               className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
                 useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
               }`}
@@ -267,16 +250,17 @@ const BentoCard = ({
         </>
       )}
 
-      {/* Blurred Background with Grey-Black Gradient - only show when using hover effect and not hovered/in view */}
+      {/* Blurred Background with Grey-Black Gradient */}
       {useHoverEffect && !showFullMedia && (
         <div className="absolute inset-0">
-          {/* Blurred background media */}
           {isVideo ? (
             <video
               src={src}
+              poster={effectivePosterSrc}
               loop
               muted
               playsInline
+              preload="none"
               autoPlay={false}
               className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
             />
@@ -284,55 +268,29 @@ const BentoCard = ({
             <img
               src={src}
               alt={title}
+              loading="lazy"
               className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
             />
           )}
           
-          {/* Grey-black gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-800/90" />
         </div>
       )}
 
-      {/* Logo/Icon - only show when using hover effect and not hovered/in view */}
+      {/* Logo/Icon */}
       {useHoverEffect && logoSrc && !showFullMedia && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <img
             ref={logoRef}
             src={logoSrc}
             alt={`${title} logo`}
+            loading="lazy"
             className="w-16 h-16 md:w-20 md:h-20 object-contain opacity-90 transition-opacity duration-300"
           />
         </div>
       )}
-
-      {/* Default blurred background for hover effect when no logo provided */}
-      {useHoverEffect && !logoSrc && !showFullMedia && (
-        <div className="absolute inset-0">
-          {/* Blurred background media */}
-          {isVideo ? (
-            <video
-              src={src}
-              loop
-              muted
-              playsInline
-              autoPlay={false}
-              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
-            />
-          ) : (
-            <img
-              src={src}
-              alt={title}
-              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
-            />
-          )}
-          
-          {/* Grey-black gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-800/90" />
-        </div>
-      )}
       
       <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-50">
-        {/* Conditionally render button */}
         {showButton && (
           <div className="absolute top-5 right-5 z-20">
             <div
@@ -349,7 +307,6 @@ const BentoCard = ({
           </div>
         )}
         
-        {/* Card content */}
         <div className="transition-all duration-500">
           <h1 className="bento-title special-font" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
             {title}
@@ -362,7 +319,7 @@ const BentoCard = ({
         </div>
       </div>
 
-      {/* Overlay for better text readability when media is showing */}
+      {/* Overlay for better text readability */}
       {(!useHoverEffect || showFullMedia) && (
         <div className={`absolute inset-0 bg-black/30 transition-opacity duration-500 ${
           useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'

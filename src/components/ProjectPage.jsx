@@ -312,6 +312,8 @@ const ProjectPage = () => {
               muted
               loop
               className="absolute left-0 top-0 size-full object-cover object-center"
+              playsInline
+              disablePictureInPicture
             />
           ) : (
             <img
@@ -428,6 +430,8 @@ const ProjectPage = () => {
               useHoverEffect={project.bentoItems?.[0]?.useHoverEffect || false}
               logoSrc={project.bentoItems?.[0]?.logoSrc || "img/logo-1.png"}
               idleAnimation={project.bentoItems?.[0]?.idleAnimation || "1"}
+              playsInline
+              disablePictureInPicture
             />
           </BentoTilt>
 
@@ -448,6 +452,8 @@ const ProjectPage = () => {
                 useHoverEffect={project.bentoItems?.[1]?.useHoverEffect || false}
                 logoSrc={project.bentoItems?.[1]?.logoSrc || "img/logo-1.png"}
                 idleAnimation={project.bentoItems?.[1]?.idleAnimation || "2"}
+                playsInline
+                disablePictureInPicture
               />
             </BentoTilt>
 
@@ -467,6 +473,8 @@ const ProjectPage = () => {
                 useHoverEffect={project.bentoItems?.[2]?.useHoverEffect || false}
                 logoSrc={project.bentoItems?.[2]?.logoSrc || "img/logo-1.png"}
                 idleAnimation={project.bentoItems?.[2]?.idleAnimation || "2"}
+                playsInline
+                disablePictureInPicture
               />
             </BentoTilt>
 
@@ -486,6 +494,8 @@ const ProjectPage = () => {
                 useHoverEffect={project.bentoItems?.[3]?.useHoverEffect || false}
                 logoSrc={project.bentoItems?.[3]?.logoSrc || "img/logo-1.png"}
                 idleAnimation={project.bentoItems?.[3]?.idleAnimation || "2"}
+                playsInline
+                disablePictureInPicture
               />
             </BentoTilt>
 
@@ -505,6 +515,8 @@ const ProjectPage = () => {
                 useHoverEffect={project.bentoItems?.[4]?.useHoverEffect || false}
                 logoSrc={project.bentoItems?.[4]?.logoSrc || "img/logo-1.png"}
                 idleAnimation={project.bentoItems?.[4]?.idleAnimation || "2"}
+                playsInline
+                disablePictureInPicture
               />
             </BentoTilt>       
             {/* Keep your existing static cards */}
@@ -523,6 +535,8 @@ const ProjectPage = () => {
                 useHoverEffect={project.bentoItems?.[5]?.useHoverEffect || false}
                 logoSrc={project.bentoItems?.[5]?.logoSrc || "img/logo-1.png"}
                 idleAnimation={project.bentoItems?.[5]?.idleAnimation || "2"}
+                playsInline
+                disablePictureInPicture
               />
             </BentoTilt>       
 

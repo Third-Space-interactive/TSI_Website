@@ -91,7 +91,7 @@ const FeedbackCard = ({
       initial="hidden"
       whileInView="show"
       viewport={{ once: true }}
-      className='relative bg-black p-10 rounded-3xl xs:w-[320px] w-full shadow-lg overflow-hidden cursor-pointer'
+      className='relative bg-black p-8 rounded-3xl w-full shadow-lg overflow-hidden cursor-pointer'
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -120,17 +120,17 @@ const FeedbackCard = ({
 
       {/* Content */}
       <div className="relative z-10">
-        <p className='text-white font-black text-[48px] leading-none'>"</p>
+        <p className='text-white font-black text-[32px] leading-none'>"</p>
 
         <div className='mt-1'>
-          <p className='text-white tracking-wider text-[18px] leading-relaxed'>{testimonial}</p>
+          <p className='text-white tracking-wider text-[16px] leading-relaxed'>{testimonial}</p>
 
-          <div className='mt-7 flex justify-between items-center gap-1'>
+          <div className='mt-6 flex justify-between items-center gap-1'>
             <div className='flex-1 flex flex-col'>
-              <p className='text-white font-medium text-[16px]'>
+              <p className='text-white font-medium text-[14px]'>
                 <span className='bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent'>@</span> {name}
               </p>
-              <p className='mt-1 text-gray-400 text-[12px]'>
+              <p className='mt-1 text-gray-400 text-[11px]'>
                 {company}
               </p>
             </div>
@@ -138,7 +138,7 @@ const FeedbackCard = ({
             <img
               src={image}
               alt={`feedback_by-${name}`}
-              className='w-10 h-10 rounded-full object-cover'
+              className='w-8 h-8 rounded-full object-cover'
             />
           </div>
         </div>
@@ -160,10 +160,13 @@ const Testimonials = () => {
         </motion.div>
       </div>
       
-      <div className="-mt-20 pb-14 px-6 sm:px-16 flex flex-wrap gap-7 justify-center">
-        {testimonials.map((testimonial, index) => (
-          <FeedbackCard key={testimonial.name} index={index} {...testimonial} />
-        ))}
+      {/* Column Layout Container */}
+      <div className="-mt-20 pb-14 px-6 sm:px-16 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <FeedbackCard key={testimonial.name} index={index} {...testimonial} />
+          ))}
+        </div>
       </div>
     </div>
   );

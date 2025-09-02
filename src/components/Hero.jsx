@@ -1,8 +1,7 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-
 import { useEffect, useRef, useState } from "react";
-import Button from "./Button.jsx"; // Fixed capitalization
+import Button from "./Button.jsx";
 import { TiLocation, TiLocationArrow } from "react-icons/ti";
 import { ScrollTrigger } from "gsap/all";
 
@@ -13,9 +12,21 @@ const hero = () => {
     const [hasClicked, setHasClicked] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [loadedVideos, setLoadedVideos] = useState(0)
+    const [isMobile, setIsMobile] = useState(false)
 
     const totalVideos = 3;
     const nextVideoRef = useRef(null);
+
+    // Detect mobile devices
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleVideoLoad = () => {
         setLoadedVideos((prev) => prev + 1);
@@ -24,7 +35,6 @@ const hero = () => {
     const upcomingVideoIndex= (currentIndex % totalVideos) + 1;
     const handleMiniVdClick = () => {
         setHasClicked(true);
-
         setCurrentIndex(upcomingVideoIndex);
     };
 
@@ -76,6 +86,7 @@ const hero = () => {
     })
 
     const getVideoSource = (index) => `videos/hero-${index}.mp4`;
+    const getPosterSource = (index) => `images/hero-${index}-poster.jpg`; // Add poster images
 
   return (
     <div className= "relative h-dvh w-screen overflow-x-hidden">
@@ -99,9 +110,11 @@ const hero = () => {
                         <video
                             ref={nextVideoRef}
                             src={getVideoSource(upcomingVideoIndex)}
+                            poster={getPosterSource(upcomingVideoIndex)}
                             loop
                             muted
                             playsInline
+                            preload={isMobile ? "metadata" : "auto"}
                             id="current-video"
                             className="size-64 origin-center scale-150 object-cover object-center"
                             onLoadedData={handleVideoLoad}
@@ -111,9 +124,11 @@ const hero = () => {
                 <video
                     ref={nextVideoRef}
                     src={getVideoSource(currentIndex)}
+                    poster={getPosterSource(currentIndex)}
                     loop
                     muted
                     playsInline
+                    preload={isMobile ? "metadata" : "auto"}
                     id="next-video"
                     className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
                     onLoadedData={handleVideoLoad}
@@ -121,10 +136,12 @@ const hero = () => {
 
                 <video
                     src={getVideoSource(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
+                    poster={getPosterSource(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
                     autoPlay
                     loop
                     muted
                     playsInline
+                    preload={isMobile ? "metadata" : "auto"}
                     className="absolute left-0 top-0 size-full object-cover object-center"
                     onLoadedData={handleVideoLoad}
                 />
