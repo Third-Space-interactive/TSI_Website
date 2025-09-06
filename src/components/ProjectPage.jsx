@@ -11,6 +11,54 @@ import AnimatedTitle from "./AnimatedTitle";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Animated Text Component (extracted from AboutDetailed.jsx)
+const AnimatedText = ({ text, className = "font-general text-sm uppercase md:text-[12px]" }) => {
+  const textRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!textRef.current) return;
+
+    // Split text into words and wrap each in a span
+    const words = text.split(' ');
+    textRef.current.innerHTML = words.map((word, index) => 
+      `<span class="word" style="opacity: 0;">${word}${index < words.length - 1 ? ' ' : ''}</span>`
+    ).join('');
+
+    const wordElements = textRef.current.querySelectorAll('.word');
+
+    // Create the typing animation
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "top 80%", // Animation starts when top of element hits 80% of viewport
+        toggleActions: "play none none none"
+      }
+    });
+
+    // Animate each word with a stagger effect
+    tl.to(wordElements, {
+      opacity: 1,
+      duration: 0.1,
+      stagger: 0.08, // Delay between each word
+      ease: "none"
+    });
+
+    // Cleanup function
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [text]);
+
+  return (
+    <div ref={containerRef}>
+      <p ref={textRef} className={className}>
+        {/* Text will be replaced by JavaScript */}
+      </p>
+    </div>
+  );
+};
+
 // Project data - you can move this to a separate file or fetch from an API
 const projectData = {
   "1700-spot": {
@@ -298,6 +346,10 @@ const ProjectPage = () => {
           align-items: center;
           justify-content: center;
         }
+
+        .word {
+          display: inline;
+        }
       `}</style>
       <main className="relative min-h-screen w-screen overflow-x-hidden">
       {/* Project Hero Section */}
@@ -332,7 +384,7 @@ const ProjectPage = () => {
           <div className="absolute left-0 bottom-0 px-5 sm:px-10 pb-8 flex flex-col items-start gap-4 w-full">
             {/* Project Header */}
             <h1 
-              className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-50" 
+              className="special-font hero-heading text-blue-50" 
               style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
               {project.title}
             </h1>
@@ -361,9 +413,13 @@ const ProjectPage = () => {
               title={project.aboutTitle}
               containerClass="mt-5 !text-black text-center"
             />  
-            <p className="font-robert-regular text-lg text-blue-75 opacity-80 leading-relaxed max-w-4xl mx-auto mt-4">
-              {project.aboutText}
-            </p>
+            {/* Replace static text with animated text component */}
+            <div className="leading-relaxed max-w-4xl mx-auto mt-4">
+              <AnimatedText 
+                text={project.aboutText}
+                className="font-robert-regular text-lg text-blue-75 opacity-80"
+              />
+            </div>
           </div>
         </div>
 
@@ -381,14 +437,14 @@ const ProjectPage = () => {
             />
             
             {/* Feature Text Overlay */}
-            <div className="feature-overlay absolute inset-0 flex items-end justify-end z-10">
-              <div className="text-center px-8 max-w-5xl w-full flex flex-col items-end mx-32">
-                 <h3 className="special-font hero-heading text-4xl md:text-6xl text-blue-50 mb-6 font-bold text-right" style={{ textShadow: "0 4px 12px rgba(0,0,0,0.8)" }}>
+            <div className="feature-overlay absolute left-0 top-0 z-40 size-full">
+              <div className="mt-24 px-5 sm:px-10">
+                 <h3 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 4px 12px rgba(0,0,0,0.8)" }}>
                     {project.featureTitle}
                   </h3>
                 <div className="w-full md:w-1/2 max-w-lg">
                   <p
-                    className="font-robert-regular text-lg md:text-xl text-white opacity-90 leading-relaxed text-right mb-10"
+                    className="mb-5 max-w-64 font-robert-regular text-blue-50"
                     style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
                   >
                     {project.featureDescription}

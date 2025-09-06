@@ -38,7 +38,7 @@ const About = () => {
           containerClass="mt-5 !text-black text-center"
         />
 
-        <div className="about-subtext">
+        <div className="about-subtext -my-10 sm:my-10">
           <p>Spark excitement, build trust, and gain support for your projects.</p>
           <p className="text-gray-500">
             Our real-time visual experiences make it easy for communities and stakeholders to explore, connect with, and believe in your vision.
@@ -49,7 +49,7 @@ const About = () => {
       <div className="h-dvh w-screen" id="clip">
         <div className="mask-clip-path about-image">
           <img
-            src="img/about.webp"
+            src="img/hero-3-mobile.webp"
             alt="Background"
             className="absolute left-0 top-0 size-full object-cover"
           />

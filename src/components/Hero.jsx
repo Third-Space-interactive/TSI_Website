@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/all";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const hero = () => {
+const Hero = () => {
     const [currentIndex, setCurrentIndex] = useState(1)
     const [hasClicked, setHasClicked] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
@@ -20,7 +20,9 @@ const hero = () => {
     // Detect mobile devices
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
+            const isMobileDevice = window.innerWidth <= 768 || 
+                /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            setIsMobile(isMobileDevice);
         };
         
         checkMobile();
@@ -32,20 +34,47 @@ const hero = () => {
         setLoadedVideos((prev) => prev + 1);
     }
 
+    const handleImageLoad = () => {
+        // For mobile, we'll consider images as "loaded videos" for the loading state
+        setLoadedVideos((prev) => prev + 1);
+    }
+
     const upcomingVideoIndex= (currentIndex % totalVideos) + 1;
     const handleMiniVdClick = () => {
-        setHasClicked(true);
-        setCurrentIndex(upcomingVideoIndex);
+        if (!isMobile) {
+            setHasClicked(true);
+            setCurrentIndex(upcomingVideoIndex);
+        }
+        // On mobile, clicking just cycles the background image
+        else {
+            setCurrentIndex(upcomingVideoIndex);
+        }
     };
 
     useEffect(() => {
-        if(loadedVideos === totalVideos -1) {
+        // On mobile, we only need to load 2 images (main + mini preview)
+        // On desktop, we need to load 3 videos but check for totalVideos - 1
+        const requiredLoads = isMobile ? 2 : totalVideos - 1;
+        
+        if(loadedVideos >= requiredLoads) {
             setIsLoading(false);
         }
-    }, [loadedVideos])
+    }, [loadedVideos, isMobile])
+
+    // Force loading to false after a timeout to prevent infinite loading
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (isLoading) {
+                console.log('Force removing loading screen after timeout');
+                setIsLoading(false);
+            }
+        }, 5000); // 5 second timeout
+
+        return () => clearTimeout(timeout);
+    }, [isLoading])
 
     useGSAP(() => {
-        if(hasClicked) {
+        if(hasClicked && !isMobile) {
             gsap.set('#next-video', { visibility: 'visible'});
             gsap.to('#next-video', {
                 transformOrigin: 'center center',
@@ -54,7 +83,7 @@ const hero = () => {
                 height: '100%',
                 duration: 1,
                 ease: 'power1.inOut',
-                onStart: () => nextVideoRef.current.play(),
+                onStart: () => nextVideoRef.current?.play(),
             })
 
             gsap.from('#current-video', {
@@ -86,7 +115,8 @@ const hero = () => {
     })
 
     const getVideoSource = (index) => `videos/hero-${index}.mp4`;
-    const getPosterSource = (index) => `images/hero-${index}-poster.jpg`; // Add poster images
+    const getMobileImageSource = (index) => `img/hero-${index}-mobile.webp`;
+    const getPosterSource = (index) => `img/hero-${index}-poster.jpg`;
 
   return (
     <div className= "relative h-dvh w-screen overflow-x-hidden">
@@ -100,70 +130,115 @@ const hero = () => {
                 </div>
             </div>
         )}
+        
         <div id="video-frame" className='relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75'>
             <div>
+                {/* Mini preview - video on desktop, image on mobile */}
                 <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
                     <div 
-                    onClick={handleMiniVdClick} 
-                    className="origin-center scale-50 opacity-0 transition-all furation-500 ease-in hover:scale-100 hover:opacity-100"
+                        onClick={handleMiniVdClick} 
+                        className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
                     >
-                        <video
-                            ref={nextVideoRef}
-                            src={getVideoSource(upcomingVideoIndex)}
-                            poster={getPosterSource(upcomingVideoIndex)}
-                            loop
-                            muted
-                            playsInline
-                            preload={isMobile ? "metadata" : "auto"}
-                            id="current-video"
-                            className="size-64 origin-center scale-150 object-cover object-center"
-                            onLoadedData={handleVideoLoad}
-                        />
+                        {isMobile ? (
+                            <img
+                                src={getMobileImageSource(upcomingVideoIndex)}
+                                alt={`Hero ${upcomingVideoIndex}`}
+                                className="size-64 origin-center scale-150 object-cover object-center"
+                                onLoad={handleImageLoad}
+                                loading="eager"
+                            />
+                        ) : (
+                            <video
+                                ref={nextVideoRef}
+                                src={getVideoSource(upcomingVideoIndex)}
+                                poster={getPosterSource(upcomingVideoIndex)}
+                                loop
+                                muted
+                                playsInline
+                                preload="metadata"
+                                id="current-video"
+                                className="size-64 origin-center scale-150 object-cover object-center"
+                                onLoadedData={handleVideoLoad}
+                            />
+                        )}
                     </div>
                 </div>
-                <video
-                    ref={nextVideoRef}
-                    src={getVideoSource(currentIndex)}
-                    poster={getPosterSource(currentIndex)}
-                    loop
-                    muted
-                    playsInline
-                    preload={isMobile ? "metadata" : "auto"}
-                    id="next-video"
-                    className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-                    onLoadedData={handleVideoLoad}
-                />
+                
+                {/* Next video (for transitions) - desktop only */}
+                {!isMobile && (
+                    <video
+                        ref={nextVideoRef}
+                        src={getVideoSource(currentIndex)}
+                        poster={getPosterSource(currentIndex)}
+                        loop
+                        muted
+                        playsInline
+                        preload="metadata"
+                        id="next-video"
+                        className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
+                        onLoadedData={handleVideoLoad}
+                    />
+                )}
 
-                <video
-                    src={getVideoSource(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
-                    poster={getPosterSource(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload={isMobile ? "metadata" : "auto"}
-                    className="absolute left-0 top-0 size-full object-cover object-center"
-                    onLoadedData={handleVideoLoad}
-                />
+                {/* Main background - video on desktop, image on mobile */}
+                {isMobile ? (
+                    <img
+                        src={getMobileImageSource(currentIndex)}
+                        alt={`Hero background ${currentIndex}`}
+                        className="absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500"
+                        onLoad={handleImageLoad}
+                        loading="eager"
+                    />
+                ) : (
+                    <video
+                        src={getVideoSource(currentIndex)}
+                        poster={getPosterSource(currentIndex)}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="absolute left-0 top-0 size-full object-cover object-center"
+                        onLoadedData={handleVideoLoad}
+                    />
+                )}
             </div> 
+            
+            {/* Hero text overlay */}
             <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
                  archviz
             </h1>
 
             <div className="absolute left-0 top-0 z-40 size-full">
                 <div className="mt-24 px-5 sm:px-10">
-                    <h1 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>third Space Interactive</h1>
-                    <p className="mb-5 max-w-64 font-robert-regular text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>Where game-engine visualization meets architectural realization</p>
+                    <h1 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+                        third Space Interactive
+                    </h1>
+                    <p className="mb-5 max-w-64 font-robert-regular text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+                        Where game-engine visualization meets architectural realization
+                    </p>
 
-                    <Button id="book-demo" title="Book a Demo" 
-                    leftIcon={<TiLocationArrow/>}
-                    containerClass="!bg-yellow-300 flex-center gap-1"
-                    href='./#contact'
+                    <Button 
+                        id="book-demo" 
+                        title="Book a Demo" 
+                        leftIcon={<TiLocationArrow/>}
+                        containerClass="!bg-yellow-300 flex-center gap-1 absolute"
+                        href='./#contact'
                     /> 
-                    
                 </div>
             </div>
+            
+            {/* Mobile loading indicator */}
+            {isMobile && isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-blue-75/50 z-30">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                        <p className="text-white text-sm">Loading images...</p>
+                    </div>
+                </div>
+            )}
         </div>
+        
         <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
              archviz
         </h1>
@@ -171,4 +246,4 @@ const hero = () => {
   )
 }
 
-export default hero
+export default Hero

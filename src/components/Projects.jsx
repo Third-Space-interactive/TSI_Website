@@ -73,7 +73,7 @@ const Projects = () => (
             src="videos/hero-3.mp4"
             title={
               <>
-                Shoquba
+                Weisshorn Shoquba
               </>
             }
             description="Shoquba is a real-estate platform allowing users to choose and customize their retail spaces before its built - all within a fully interactive 3D environment."
@@ -88,7 +88,7 @@ const Projects = () => (
             src="videos/hero-2.mp4"
             title={
               <>
-                Project ReVamp
+                ReVamp
               </>
             }
             description="A case-study for a long-term care facility in Ottawa, Canada - allowing residents to explore and customize their living spaces + amenities before its built."
@@ -117,7 +117,7 @@ const Projects = () => (
             src="videos/hero-2.mp4"
             title={
               <>
-                Nature Museum
+                Live Sketch
               </>
             }
             description="Storytelling experience of Canada's Nature Museum. Allowing users to explore the building's history through through a unique visual narrative."

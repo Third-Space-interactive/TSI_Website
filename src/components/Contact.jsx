@@ -88,8 +88,8 @@ const Contact = () => {
           </p>
 
           <AnimatedTitle
-            title="Together, we can <br/> turn ideas <br/> into experiences."
-            className="special-font !md:text-[6.2rem] w-full font-zentry !text-5xl !font-black !leading-[.9] mb-10"
+            title="Together, we can <br/> turn ideas <br/> into Reality."
+            className="special-font !md:text-[6.2rem] w-full font-zentry !text-5xl !font-black !leading-[.9] mb-10 !sm:text-[4.2rem]"
           />
 
           {/* Contact Form */}

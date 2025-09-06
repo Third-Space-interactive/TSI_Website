@@ -65,7 +65,7 @@ const handleMouseMove = (e) => {
                                 onMouseUp={handleMouseLeave}
                                 onMouseEnter={handleMouseLeave}
                                 onMouseMove={handleMouseMove}
-                                src='/img/entrance.png'
+                                src='/img/entrance.webp'
                                 alt="entrance"
                                 className='object-contain'
                             />

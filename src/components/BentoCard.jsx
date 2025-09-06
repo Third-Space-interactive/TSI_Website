@@ -22,6 +22,7 @@ const BentoCard = ({
   const [isInView, setIsInView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const hoverButtonRef = useRef(null);
   const cardRef = useRef(null);
   const logoRef = useRef(null);
@@ -29,10 +30,30 @@ const BentoCard = ({
   const videoRef = useRef(null);
   const navigate = useNavigate();
 
+  // Helper function to get mobile-optimized source
+  const getOptimizedSrc = (originalSrc) => {
+    if (!isMobile || !originalSrc) return originalSrc;
+    
+    // For mobile, use WebP images instead of videos
+    if (isVideo && originalSrc.includes('.mp4')) {
+      return originalSrc.replace('.mp4', '-mobile.webp').replace('videos/', 'img/');
+    }
+    
+    // For images, keep as is or optimize if needed
+    return originalSrc;
+  };
+
+  // Helper function to get fallback src if mobile version fails
+  const getFallbackSrc = () => {
+    return src; // Return original source as fallback
+  };
+
   // Detect mobile devices
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const isMobileDevice = window.innerWidth <= 768 || 
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
     };
     
     checkMobile();
@@ -40,25 +61,30 @@ const BentoCard = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Intersection Observer for mobile scroll detection and lazy loading
+  // Enhanced Intersection Observer for mobile scroll detection and lazy loading
   useEffect(() => {
     if (!cardRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.3;
+        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.1;
         
         if (useHoverEffect) {
-          setIsInView(isVisible && entry.intersectionRatio > 0.5);
+          setIsInView(isVisible && entry.intersectionRatio > 0.3);
         }
         
-        // Lazy load video on mobile when card becomes visible
+        // Enhanced lazy load logic for mobile
         if (isVisible && isMobile && isVideo && videoRef.current && !videoLoaded) {
-          videoRef.current.load(); // Trigger video loading
-          setVideoLoaded(true);
+          // On mobile, we're loading images instead of videos, so handle accordingly
+          setTimeout(() => {
+            setVideoLoaded(true);
+          }, 200);
         }
       },
-      { threshold: [0, 0.3, 0.5, 1] }
+      { 
+        threshold: [0, 0.1, 0.3, 0.5, 1],
+        rootMargin: isMobile ? '50px' : '100px'
+      }
     );
 
     observer.observe(cardRef.current);
@@ -183,6 +209,14 @@ const BentoCard = ({
     }
   };
 
+  // Handle image loading error (fallback to desktop version)
+  const handleImageError = () => {
+    if (isMobile && !videoError) {
+      setVideoError(true);
+      // Could implement fallback logic here
+    }
+  };
+
   const buttonLabel = isComingSoon ? "coming soon" : "see project";
   const buttonTextColor = isComingSoon ? "text-white/20" : "text-white";
   const buttonBg = isComingSoon ? "bg-black" : "bg-blue-600 hover:bg-blue-700";
@@ -205,6 +239,9 @@ const BentoCard = ({
   // Generate poster source if not provided
   const effectivePosterSrc = posterSrc || (isVideo ? src.replace('.mp4', '-poster.jpg') : null);
 
+  // Get optimized source
+  const optimizedSrc = getOptimizedSrc(src);
+
   return (
     <div 
       ref={cardRef}
@@ -215,7 +252,18 @@ const BentoCard = ({
       {/* Background Media */}
       {(!useHoverEffect || showFullMedia) && (
         <>
-          {isVideo ? (
+          {/* On mobile, always show image; on desktop, show video if isVideo is true */}
+          {(isMobile || !isVideo) ? (
+            <img
+              src={optimizedSrc}
+              alt={title}
+              loading="lazy"
+              className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
+                useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
+              }`}
+              onError={handleImageError}
+            />
+          ) : (
             <video
               ref={videoRef}
               src={src}
@@ -223,28 +271,19 @@ const BentoCard = ({
               loop
               muted
               playsInline
-              preload={isMobile ? "none" : "metadata"} // Don't preload on mobile
-              autoPlay={!isMobile && (useHoverEffect ? showFullMedia : true)}
+              preload="metadata"
+              autoPlay={useHoverEffect ? showFullMedia : true}
               className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
                 useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
               }`}
               onCanPlay={() => {
-                // Auto play when video can play on mobile
-                if (isMobile && showFullMedia && videoRef.current) {
+                // Auto play when video can play
+                if (showFullMedia && videoRef.current) {
                   videoRef.current.play().catch(() => {
-                    // Handle autoplay restrictions
+                    // Handle autoplay restrictions silently
                   });
                 }
               }}
-            />
-          ) : (
-            <img
-              src={src}
-              alt={title}
-              loading="lazy" // Lazy load images
-              className={`absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 ${
-                useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
-              }`}
             />
           )}
         </>
@@ -253,7 +292,15 @@ const BentoCard = ({
       {/* Blurred Background with Grey-Black Gradient */}
       {useHoverEffect && !showFullMedia && (
         <div className="absolute inset-0">
-          {isVideo ? (
+          {(isMobile || !isVideo) ? (
+            <img
+              src={optimizedSrc}
+              alt={title}
+              loading="lazy"
+              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
+              onError={handleImageError}
+            />
+          ) : (
             <video
               src={src}
               poster={effectivePosterSrc}
@@ -262,13 +309,6 @@ const BentoCard = ({
               playsInline
               preload="none"
               autoPlay={false}
-              className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
-            />
-          ) : (
-            <img
-              src={src}
-              alt={title}
-              loading="lazy"
               className="absolute left-0 top-0 size-full object-cover object-center filter blur-md scale-110"
             />
           )}
@@ -289,10 +329,10 @@ const BentoCard = ({
           />
         </div>
       )}
-      
+        
       <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-50">
         {showButton && (
-          <div className="absolute top-5 right-5 z-20">
+          <div className="absolute bottom-10 right-5 z-20">
             <div
               ref={hoverButtonRef}
               onMouseMove={handleMouseMove}
@@ -312,7 +352,7 @@ const BentoCard = ({
             {title}
           </h1>
           {description && (
-            <p className="mt-3 max-w-64 text-xs md:text-base drop-shadow-lg" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+            <p className="mt-3 max-w-64 text-xs md:text-base drop-shadow-lg hidden sm:block" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
               {description}
             </p>
           )}
