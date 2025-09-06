@@ -2,6 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TiLocationArrow } from "react-icons/ti";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 const BentoCard = ({ 
   src, 
@@ -14,7 +18,10 @@ const BentoCard = ({
   logoSrc,
   useHoverEffect = false,
   idleAnimation = 0,
-  posterSrc // Add poster prop for video thumbnail
+  posterSrc, // Add poster prop for video thumbnail
+  animationDelay = 0, // Add delay for staggered animations
+  animationDuration = 0.8, // Customizable animation duration
+  animationEase = "power2.out" // Customizable easing
 }) => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [hoverOpacity, setHoverOpacity] = useState(0);
@@ -28,6 +35,7 @@ const BentoCard = ({
   const logoRef = useRef(null);
   const animationRef = useRef(null);
   const videoRef = useRef(null);
+  const scrollAnimationRef = useRef(null);
   const navigate = useNavigate();
 
   // Helper function to get mobile-optimized source
@@ -60,6 +68,85 @@ const BentoCard = ({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // GSAP Scroll Animation Setup
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    // Set initial state - card starts below viewport with no outline
+    gsap.set(cardRef.current, {
+      y: 100,
+      opacity: 0,
+      scale: 0.95,
+      rotationX: 15,
+      visibility: "hidden" // Hide completely until animation starts
+    });
+
+    // Create scroll-triggered animation
+    scrollAnimationRef.current = ScrollTrigger.create({
+      trigger: cardRef.current,
+      start: "top 85%", // Start animation when card is 85% down the viewport
+      end: "top 15%", // End animation when card is 15% down the viewport
+      scrub: false, // Smooth animation instead of scrubbing
+      toggleActions: "play none play reverse", // play on enter, no action on leave down, play on enter back, reverse on leave back
+      
+      onEnter: () => {
+        // Entry animation - make visible and animate in
+        gsap.set(cardRef.current, { visibility: "visible" });
+        gsap.to(cardRef.current, {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotationX: 0,
+          duration: animationDuration,
+          ease: animationEase,
+          delay: animationDelay,
+          clearProps: "transform,opacity" // Clear inline styles after animation
+        });
+      },
+      
+      onLeave: () => {
+        // No exit animation when scrolling down past the card
+        // Card stays visible and in place
+      },
+      
+      onEnterBack: () => {
+        // Re-enter animation (scrolling back up to the card)
+        gsap.set(cardRef.current, { visibility: "visible" });
+        gsap.to(cardRef.current, {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotationX: 0,
+          duration: animationDuration,
+          ease: animationEase,
+          clearProps: "transform,opacity"
+        });
+      },
+      
+      onLeaveBack: () => {
+        // Exit animation (scrolling up past the card)
+        gsap.to(cardRef.current, {
+          y: 100,
+          opacity: 0,
+          scale: 0.95,
+          rotationX: 15,
+          duration: animationDuration * 0.7,
+          ease: "power2.in",
+          onComplete: () => {
+            gsap.set(cardRef.current, { visibility: "hidden" });
+          }
+        });
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      if (scrollAnimationRef.current) {
+        scrollAnimationRef.current.kill();
+      }
+    };
+  }, [animationDelay, animationDuration, animationEase]);
 
   // Enhanced Intersection Observer for mobile scroll detection and lazy loading
   useEffect(() => {
@@ -245,7 +332,12 @@ const BentoCard = ({
   return (
     <div 
       ref={cardRef}
-      className="relative size-full overflow-hidden"
+      className="relative size-full overflow-hidden bg-black border-0 bento-card-container"
+      style={{ 
+        outline: 'none',
+        border: 'none',
+        boxShadow: 'none'
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -361,7 +453,7 @@ const BentoCard = ({
 
       {/* Overlay for better text readability */}
       {(!useHoverEffect || showFullMedia) && (
-        <div className={`absolute inset-0 bg-black/30 transition-opacity duration-500 ${
+        <div className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${
           useHoverEffect ? (showFullMedia ? 'opacity-100' : 'opacity-0') : 'opacity-100'
         }`} />
       )}

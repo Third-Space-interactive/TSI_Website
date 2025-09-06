@@ -46,8 +46,12 @@ const AboutDetailed = () => {
   }, [])
 
   return (
-    <div ref={containerRef} className="about-detailed-container">
-      <div className="about-content">
+    <div id="about" ref={containerRef} className="about-detailed-container">
+
+      <div className="about-content relative mb-8 mt-36 flex flex-col items-center gap-5">
+        <p className="font-general text-sm uppercase md:text-[10px]">
+           Welcome to Third Space Interactive
+        </p>
         <p ref={textRef} className="animated-text">
           {/* Text will be replaced by JavaScript */}
         </p>

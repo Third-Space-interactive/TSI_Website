@@ -43,7 +43,7 @@ const handleMouseMove = (e) => {
 }
 
   return (
-    <section id="services" className="min-h-dvh w-screen bg-black text-blue-50">
+    <section id="services" className="min-h-dvh w-screen bg-black text-blue-50 sm:-mt-80 mt-0">
         <div className='flex size-full flex-col items-center py-10 '>
             <p className='font-general text-sm uppercase md:text-[10px]'>
                 Discover What We Can Build Together

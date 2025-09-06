@@ -39,6 +39,12 @@ body {
 }
 
 @layer utilities {
+  .bento-card-container {
+  background: black !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
   .border-hsla {
     @apply border border-white/20;
   }

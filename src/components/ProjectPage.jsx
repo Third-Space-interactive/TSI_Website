@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
@@ -59,17 +59,191 @@ const AnimatedText = ({ text, className = "font-general text-sm uppercase md:tex
   );
 };
 
+// Animated Text Component for Hero Section
+const HeroAnimatedText = ({ text, className, isTitle = false }) => {
+  const textRef = useRef(null);
+  const containerRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!textRef.current) return;
+
+    // Split text into words and wrap each in a span
+    const words = text.split(' ');
+    textRef.current.innerHTML = words.map((word, index) => 
+      `<span class="hero-word" style="opacity: 0; transform: translateY(30px);">${word}${index < words.length - 1 ? ' ' : ''}</span>`
+    ).join('');
+
+    const wordElements = textRef.current.querySelectorAll('.hero-word');
+
+    // Reset and set initial state for text elements
+    const resetAndAnimate = () => {
+      gsap.set(wordElements, {
+        y: 30,
+        opacity: 0
+      });
+
+      // Entry animation
+      const entryTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          toggleActions: "play none none reverse",
+          onEnter: () => {
+            // Force animation to play when entering
+            entryTl.restart();
+          }
+        }
+      });
+
+      entryTl.to(wordElements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: isTitle ? 0.1 : 0.05,
+        ease: "power2.out"
+      });
+
+      // Exit animation
+      const exitTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "bottom center",
+          end: "bottom top",
+          scrub: 1
+        }
+      });
+
+      exitTl.to(wordElements, {
+        opacity: 0,
+        y: -20,
+        duration: 0.3,
+        stagger: isTitle ? 0.02 : 0.01,
+        ease: "power2.in"
+      });
+    };
+
+    resetAndAnimate();
+
+    // Cleanup function
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.vars && trigger.vars.trigger === containerRef.current) {
+          trigger.kill();
+        }
+      });
+    };
+  }, [text, isTitle, location.pathname]);
+
+  // Solution 3: Force animation on component focus (failsafe for edge cases)
+  useEffect(() => {
+    if (!textRef.current) return;
+    
+    // Force scroll trigger refresh
+    ScrollTrigger.refresh();
+    
+    // Small delay to ensure DOM is ready
+    const timeout = setTimeout(() => {
+      const wordElements = textRef.current?.querySelectorAll('.hero-word');
+      if (!wordElements || wordElements.length === 0) return;
+
+      // Check if text elements are still hidden (edge case detection)
+      const isHidden = Array.from(wordElements).some(word => 
+        window.getComputedStyle(word).opacity === '0' || word.style.opacity === '0'
+      );
+
+      if (isHidden) {
+        console.log('ProjectPage Failsafe: Manually triggering hero text animations');
+        
+        // Manually restart the text animations as failsafe
+        gsap.set(wordElements, {
+          y: 30,
+          opacity: 0
+        });
+        
+        gsap.to(wordElements, {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          stagger: isTitle ? 0.1 : 0.05,
+          ease: 'power2.out',
+          delay: 0.1
+        });
+      }
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, [location.pathname, isTitle]);
+
+  // Additional failsafe: Force animation when scrolled to top
+  useEffect(() => {
+    const handleScrollToTop = () => {
+      if (window.scrollY === 0 && textRef.current) {
+        const timeout = setTimeout(() => {
+          const wordElements = textRef.current?.querySelectorAll('.hero-word');
+          if (!wordElements || wordElements.length === 0) return;
+
+          const isHidden = Array.from(wordElements).some(word => 
+            window.getComputedStyle(word).opacity === '0'
+          );
+
+          if (isHidden) {
+            console.log('ProjectPage Logo click failsafe: Forcing hero animations');
+            
+            // Kill existing ScrollTriggers to avoid conflicts
+            ScrollTrigger.getAll().forEach(trigger => {
+              if (trigger.vars && trigger.vars.trigger === containerRef.current) {
+                trigger.kill();
+              }
+            });
+            
+            // Force immediate animation
+            gsap.set(wordElements, {
+              y: 0,
+              opacity: 1
+            });
+          }
+        }, 200);
+        
+        return () => clearTimeout(timeout);
+      }
+    };
+
+    // Listen for scroll events
+    window.addEventListener('scroll', handleScrollToTop);
+    // Also check immediately in case we're already at top
+    handleScrollToTop();
+
+    return () => window.removeEventListener('scroll', handleScrollToTop);
+  }, [location.pathname]);
+
+  return (
+    <div ref={containerRef}>
+      {isTitle ? (
+        <h1 ref={textRef} className={className}>
+          {/* Text will be replaced by JavaScript */}
+        </h1>
+      ) : (
+        <p ref={textRef} className={className}>
+          {/* Text will be replaced by JavaScript */}
+        </p>
+      )}
+    </div>
+  );
+};
+
 // Project data - you can move this to a separate file or fetch from an API
 const projectData = {
   "1700-spot": {
     title: "1700 Spot",
     heroImage: "/videos/hero-1.mp4",
     description: "1700 Spot is an interactive, real-time platform that gamifies community consultation by enabling residents to collaboratively visualize, and shape their neighbourhoods using immersive 3D experiences",
-    aboutTitle: 'Russell Heights',
-    aboutText: "This groundbreaking project transforms how communities engage with urban planning. By leveraging cutting-edge game engine technology, we've created an immersive platform where residents can walk through proposed developments, provide feedback in real-time, and collaborate on shaping their neighborhood's future. The platform features photorealistic rendering, real-time lighting simulation, and intuitive interaction systems that make complex architectural concepts accessible to everyone.",
-    aboutImage: "/img/russell-deployment.png",
+    aboutTitle: 'Community Designed <br/> Community Built.',
+    aboutText: "1700 Spot is a multifunctional public space co-designed with the Russell Heights community to promote youth mental health and well-being. Developed through a collaboration between community organizations and Carleton Architecture students, the space features a gathering zone, an outdoor cinema, and a gym. From the early stages of consultation, 3D visualizations proved especially engaging for the community- particularly the youth - who were excited to see representations of the spaces they helped shape.",
+    aboutImage: "/img/russell-deployment.webp",
     featureTitle: "Interactive Community Engagement",
-    featureDescription: '"1700 Spot was deployed through the web using our in-house streaming and hosting service powered by AWS. This scalable approach allowed all community members to explore the applicaton - allowing for more engagement, support and excitment for the design"',
+    featureDescription: "By deploying 1700 Spot through our custom web streaming service, we eliminated barriers and invited the entire community into the design process. Powered by AWS infrastructure, residents could explore, interact, and shape their neighborhood's vision from any device-turning community consultation into a shared adventure that sparked real enthusiasm and collective ownership.",
     bentoItems: [
       {
         src: "/videos/Russell-Heights/rh_features-2.mp4",
@@ -84,7 +258,7 @@ const projectData = {
         description: "Quickly break apart your models into its different components",
         isVideo: true,
         useHoverEffect: true,
-        logoSrc: '/img/rh/displace.png',
+        logoSrc: '/img/Russell-Heights/displace.png',
         idleAnimation: 2
       },
       {
@@ -93,7 +267,7 @@ const projectData = {
         description: "Experience dynamic lighting and different seasons",
         isVideo: false,
         useHoverEffect: true,
-        logoSrc: '/img/rh/tod.png',
+        logoSrc: '/img/Russell-Heights/tod.png',
         idleAnimation: 1
       },
       {
@@ -102,7 +276,7 @@ const projectData = {
         description: "Explore your site from the ground before its built!",
         isVideo: false,
         useHoverEffect: true,
-        logoSrc: '/img/rh/fpv.png',
+        logoSrc: '/img/Russell-Heights/fpv.png',
         idleAnimation: 3
       },
       {
@@ -347,7 +521,7 @@ const ProjectPage = () => {
           justify-content: center;
         }
 
-        .word {
+        .word, .hero-word {
           display: inline;
         }
       `}</style>
@@ -375,31 +549,37 @@ const ProjectPage = () => {
             />
           )}
           
-          {/* Dark overlay for better text readability */}
-          <div className="absolute left-0 bottom-0 z-20 size-full bg-black/20" />
+          {/* Gradient overlay from bottom to center */}
+          <div className="absolute left-0 top-0 size-full bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10 pointer-events-none"></div>
         </div>
 
         {/* Hero Content */}
-        <div className="absolute left-0 top-0 z-40 size-full">
+        <div className="absolute left-0 top-0 z-40 size-full hero-text-content">
           <div className="absolute left-0 bottom-0 px-5 sm:px-10 pb-8 flex flex-col items-start gap-4 w-full">
-            {/* Project Header */}
-            <h1 
-              className="special-font hero-heading text-blue-50" 
-              style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
-              {project.title}
-            </h1>
-            <p className="mb-2 max-w-md font-robert-regular text-blue-100 text-lg" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
-              {project.description}
-            </p>
-            <Button 
-              id="scroll-down" 
-              title="Explore Project" 
-              leftIcon={<TiLocationArrow/>}
-              containerClass="!bg-yellow-300 flex-center gap-1"
-              onClick={() => {
-                document.getElementById('about-project').scrollIntoView({ behavior: 'smooth' });
-              }}
-            /> 
+            {/* Project Header with animated text */}
+            <HeroAnimatedText
+              text={project.title}
+              className="special-font hero-heading text-blue-50"
+              isTitle={true}
+            />
+            
+            <HeroAnimatedText
+              text={project.description}
+              className="mb-2 max-w-md font-robert-regular text-blue-100 text-lg"
+              isTitle={false}
+            />
+            
+            <div className="hero-button">
+              <Button 
+                id="scroll-down" 
+                title="Explore Project" 
+                leftIcon={<TiLocationArrow/>}
+                containerClass="!bg-yellow-300 flex-center gap-1"
+                onClick={() => {
+                  document.getElementById('about-project').scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -438,19 +618,19 @@ const ProjectPage = () => {
             
             {/* Feature Text Overlay */}
             <div className="feature-overlay absolute left-0 top-0 z-40 size-full">
-              <div className="mt-24 px-5 sm:px-10">
-                 <h3 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 4px 12px rgba(0,0,0,0.8)" }}>
-                    {project.featureTitle}
-                  </h3>
-                <div className="w-full md:w-1/2 max-w-lg">
-                  <p
-                    className="mb-5 max-w-64 font-robert-regular text-blue-50"
-                    style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
-                  >
-                    {project.featureDescription}
-                  </p>
+              <AnimatedTitle
+              title={project.featureTitle}
+              containerClass="mt-5 !text-whit text-center"
+            />  
+
+                <div className="leading-relaxed max-w-4xl mx-auto mt-4">
+                <AnimatedText 
+                text={project.featureDescription}
+                className="font-robert-regular text-lg text-white"
+                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
+              />
+
                 </div>
-              </div>
             </div>
           </div>
         </div>
@@ -470,7 +650,7 @@ const ProjectPage = () => {
       </div>
           
           {/* Main feature card - using first bentoItem */}
-          <BentoTilt className="border-hsla relative mb-7 h-96 w-full overflow-hidden rounded-md md:h-[65vh]">
+          <BentoTilt className="border border-black relative mb-7 h-96 w-full overflow-hidden rounded-md md:h-[65vh]">
             <BentoCard
               src={project.bentoItems?.[0]?.src || "videos/hero-1.mp4"}
               title={
@@ -493,7 +673,7 @@ const ProjectPage = () => {
 
           <div className="grid h-[135vh] w-full grid-cols-2 grid-rows-3 gap-7">
             {/* First grid item - using second bentoItem */}
-            <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2">
+            <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2 !border !border-black">
               <BentoCard
                 src={project.bentoItems?.[1]?.src || "videos/shoquba-1.mp4"}
                 title={
@@ -514,7 +694,7 @@ const ProjectPage = () => {
             </BentoTilt>
 
             {/* Second grid item - using third bentoItem */}
-            <BentoTilt className="bento-tilt_1 row-span-1 ms-32 md:col-span-1 md:ms-0">
+            <BentoTilt className="bento-tilt_1 row-span-1 ms-32 md:col-span-1 md:ms-0 !border !border-black">
               <BentoCard
                 src={project.bentoItems?.[2]?.src || "videos/feature-3.mp4"}
                 title={
@@ -535,7 +715,7 @@ const ProjectPage = () => {
             </BentoTilt>
 
             {/* Third grid item - using fourth bentoItem */}
-            <BentoTilt className="bento-tilt_1 me-14 md:col-span-1 md:me-0">
+            <BentoTilt className="bento-tilt_1 me-14 md:col-span-1 md:me-0 !border !border-black">
               <BentoCard
                 src={project.bentoItems?.[3]?.src || "videos/hero-2.mp4"}
                 title={
@@ -556,7 +736,7 @@ const ProjectPage = () => {
             </BentoTilt>
 
             {/* Keep your existing static cards */}
-            <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2">
+            <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2 !border !border-black">
               <BentoCard
                 src={project.bentoItems?.[4]?.src || "videos/hero-2.mp4"}
                 title={
@@ -576,7 +756,7 @@ const ProjectPage = () => {
               />
             </BentoTilt>       
             {/* Keep your existing static cards */}
-            <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2">
+            <BentoTilt className="border border-black bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2 !border !border-black">
               <BentoCard
                 src={project.bentoItems?.[5]?.src || "videos/hero-2.mp4"}
                 title={
@@ -596,7 +776,7 @@ const ProjectPage = () => {
               />
             </BentoTilt>       
 
-            <BentoTilt className="bento-tilt_2">
+            <BentoTilt className="bento-tilt_2 !border !border-black">
               <video
                 src="videos/hero-2.mp4"
                 loop
@@ -618,6 +798,12 @@ const ProjectPage = () => {
               className="group relative h-64 overflow-hidden rounded-lg cursor-pointer bg-gradient-to-br from-blue-600 to-purple-700"
               onClick={handleReturnToProjects}
             >
+              <img 
+              src="/img/hero-3-mobile.webp"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              alt="Get in touch background"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-5 pointer-events-none"></div>
               <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-60 transition-opacity duration-300 z-10"></div>
               <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Button
@@ -637,6 +823,12 @@ const ProjectPage = () => {
               className="group relative h-64 overflow-hidden rounded-lg cursor-pointer bg-gradient-to-br from-yellow-500 to-orange-600"
               onClick={handleGetInTouch}
             >
+              <img 
+              src="/img/russell-deployment.webp"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              alt="Get in touch background"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-5 pointer-events-none"></div>
               <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-60 transition-opacity duration-300 z-10"></div>
               <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Button

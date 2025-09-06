@@ -27,11 +27,8 @@ const About = () => {
   });
 
   return (
-    <div id="about" className="min-h-screen w-screen">
-      <div className="relative mb-8 mt-36 flex flex-col items-center gap-5">
-        <p className="font-general text-sm uppercase md:text-[10px]">
-           Welcome to Third Space Interactive
-        </p>
+    <div className="min-h-screen w-screen">
+      <div className="relative mb-8 flex flex-col items-center gap-5">
 
         <AnimatedTitle
           title="Show c<b>o</b>mmunities the future - <br/> and <b>b</b>ring them on board"

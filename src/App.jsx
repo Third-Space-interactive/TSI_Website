@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AboutDetailed from './components/AboutDetailed.jsx';
 import About from './components/About.jsx';
-import AnimatedFeatures from './components/AnimatedFeatures.jsx';
 import Hero from './components/Hero.jsx';
 import Navbar from './components/Navbar.jsx';
 import Services from './components/Services.jsx';
@@ -17,7 +16,6 @@ const LandingPage = () => {
     <main className="relative min-h-screen w-screen overflow-x-hidden">
       <Hero />
       <AboutDetailed />
-      <AnimatedFeatures />
       <About />
       <Projects />
       <Services />

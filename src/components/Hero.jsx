@@ -73,6 +73,82 @@ const Hero = () => {
         return () => clearTimeout(timeout);
     }, [isLoading])
 
+    // Solution 3: Force animation on component focus (failsafe for edge cases)
+    useEffect(() => {
+        const heroElement = document.querySelector('.hero-text-content');
+        if (heroElement) {
+            // Force scroll trigger refresh and restart animations
+            ScrollTrigger.refresh();
+            
+            // Small delay to ensure DOM is ready
+            const timeout = setTimeout(() => {
+                // Check if text elements are still hidden (edge case detection)
+                const titleElement = document.querySelector('.hero-title');
+                const isHidden = titleElement && (
+                    window.getComputedStyle(titleElement).opacity === '0' ||
+                    titleElement.style.opacity === '0'
+                );
+
+                if (isHidden) {
+                    console.log('Failsafe: Manually triggering hero text animations');
+                    
+                    // Manually restart the text animations as failsafe
+                    gsap.set(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
+                        y: 100,
+                        opacity: 0
+                    });
+                    
+                    gsap.to(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1,
+                        stagger: 0.2,
+                        ease: 'power2.out',
+                        delay: 0.1
+                    });
+                }
+            }, 100);
+
+            return () => clearTimeout(timeout);
+        }
+    }, [location.pathname])
+
+    // Additional failsafe: Force animation when scrolled to top
+    useEffect(() => {
+        const handleScrollToTop = () => {
+            if (window.scrollY === 0) {
+                const timeout = setTimeout(() => {
+                    const titleElement = document.querySelector('.hero-title');
+                    if (titleElement && window.getComputedStyle(titleElement).opacity === '0') {
+                        console.log('Logo click failsafe: Forcing hero animations');
+                        
+                        // Kill existing ScrollTriggers to avoid conflicts
+                        ScrollTrigger.getAll().forEach(trigger => {
+                            if (trigger.vars && trigger.vars.trigger === '.hero-text-content') {
+                                trigger.kill();
+                            }
+                        });
+                        
+                        // Force immediate animation
+                        gsap.set(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
+                            y: 0,
+                            opacity: 1
+                        });
+                    }
+                }, 200);
+                
+                return () => clearTimeout(timeout);
+            }
+        };
+
+        // Listen for scroll events
+        window.addEventListener('scroll', handleScrollToTop);
+        // Also check immediately in case we're already at top
+        handleScrollToTop();
+
+        return () => window.removeEventListener('scroll', handleScrollToTop);
+    }, [location.pathname])
+
     useGSAP(() => {
         if(hasClicked && !isMobile) {
             gsap.set('#next-video', { visibility: 'visible'});
@@ -112,7 +188,91 @@ const Hero = () => {
                 scrub: true,
             }
         })
-    })
+
+        // Reset and set initial state for text elements
+        const resetAndAnimate = () => {
+            gsap.set(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
+                y: 100,
+                opacity: 0
+            });
+
+            // Text animation timeline for entry
+            const textTimeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '.hero-text-content',
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    toggleActions: 'play none none reverse',
+                    onEnter: () => {
+                        // Force animation to play when entering
+                        textTimeline.restart();
+                    }
+                }
+            });
+
+            // Animate main title
+            textTimeline.to('.hero-title', {
+                y: 0,
+                opacity: 1,
+                duration: 1,
+                ease: 'power2.out',
+            })
+            // Animate subtitle
+            .to('.hero-subtitle', {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out',
+            }, '-=0.6')
+            // Animate button
+            .to('.hero-button', {
+                y: 0,
+                opacity: 1,
+                duration: 0.6,
+                ease: 'power2.out',
+            }, '-=0.4')
+            // Animate corner text
+            .to('.hero-corner-text', {
+                y: 0,
+                opacity: 1,
+                duration: 0.6,
+                ease: 'power2.out',
+            }, '-=0.4');
+
+            // Exit animation
+            const exitTimeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '.hero-text-content',
+                    start: 'bottom center',
+                    end: 'bottom top',
+                    scrub: 1,
+                }
+            });
+
+            exitTimeline.to('.hero-title', {
+                y: -50,
+                opacity: 0,
+                duration: 0.5,
+            })
+            .to('.hero-subtitle', {
+                y: -30,
+                opacity: 0,
+                duration: 0.5,
+            }, '-=0.3')
+            .to('.hero-button', {
+                y: -20,
+                opacity: 0,
+                duration: 0.5,
+            }, '-=0.3')
+            .to('.hero-corner-text', {
+                y: -20,
+                opacity: 0,
+                duration: 0.5,
+            }, '-=0.3');
+        };
+
+        resetAndAnimate();
+    }, [location.pathname])
 
     const getVideoSource = (index) => `videos/hero-${index}.mp4`;
     const getMobileImageSource = (index) => `img/hero-${index}-mobile.webp`;
@@ -150,8 +310,8 @@ const Hero = () => {
                         ) : (
                             <video
                                 ref={nextVideoRef}
-                                src={getVideoSource(upcomingVideoIndex)}
-                                poster={getPosterSource(upcomingVideoIndex)}
+                                src={getMobileImageSource(upcomingVideoIndex)}
+                                poster={getMobileImageSource(upcomingVideoIndex)}
                                 loop
                                 muted
                                 playsInline
@@ -202,29 +362,34 @@ const Hero = () => {
                         onLoadedData={handleVideoLoad}
                     />
                 )}
+                
+                {/* Gradient overlay from top */}
+                <div className="absolute left-0 top-0 size-full bg-gradient-to-b from-black/30 via-black/10 to-transparent z-10 pointer-events-none"></div>
             </div> 
             
             {/* Hero text overlay */}
-            <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+            <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-50 hero-corner-text">
                  archviz
             </h1>
 
-            <div className="absolute left-0 top-0 z-40 size-full">
+            <div className="absolute left-0 top-0 z-40 size-full hero-text-content">
                 <div className="mt-24 px-5 sm:px-10">
-                    <h1 className="special-font hero-heading text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+                    <h1 className="special-font hero-heading text-blue-50 hero-title">
                         third Space Interactive
                     </h1>
-                    <p className="mb-5 max-w-64 font-robert-regular text-blue-50" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
+                    <p className="mb-5 max-w-64 font-robert-regular text-blue-50 hero-subtitle" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>
                         Where game-engine visualization meets architectural realization
                     </p>
 
-                    <Button 
-                        id="book-demo" 
-                        title="Book a Demo" 
-                        leftIcon={<TiLocationArrow/>}
-                        containerClass="!bg-yellow-300 flex-center gap-1 absolute"
-                        href='./#contact'
-                    /> 
+                    <div className="hero-button">
+                        <Button 
+                            id="book-demo" 
+                            title="Book a Demo" 
+                            leftIcon={<TiLocationArrow/>}
+                            containerClass="!bg-yellow-300 flex-center gap-1 absolute"
+                            href='./#contact'
+                        />
+                    </div>
                 </div>
             </div>
             
