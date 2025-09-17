@@ -66,10 +66,11 @@ const Navbar = () => {
         }
     }, [isAudioPlaying]);
 
-    // Function to scroll to top
+    // Function to scroll to top with full page refresh if needed
     const scrollToTop = () => {
         if (isProjectPage) {
-            navigate('/');
+            // Force full page refresh to home page
+            window.location.href = '/';
         } else {
             window.scrollTo({
                 top: 0,
@@ -78,17 +79,11 @@ const Navbar = () => {
         }
     };
 
-    // Handle navigation to sections
+    // Handle navigation to sections with full page refresh if needed
     const handleNavigation = (sectionId) => {
         if (isProjectPage) {
-            // If on project page, navigate to home first then scroll to section
-            navigate('/', { replace: true });
-            setTimeout(() => {
-                const element = document.getElementById(sectionId.toLowerCase());
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 100);
+            // If on project page, use full page refresh to home with hash
+            window.location.href = `/#${sectionId.toLowerCase()}`;
         } else {
             // If on home page, just scroll to section
             const element = document.getElementById(sectionId.toLowerCase());

@@ -66,8 +66,22 @@ body {
   }
 
   .mask-clip-path {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  }
+  width: 50vw !important;
+  height: 50vh !important;
+  border-radius: 20px !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  overflow: hidden !important;
+}
+
+/* Reset on page load */
+body:not(.gsap-animation-active) .mask-clip-path {
+  width: 50vw !important;
+  height: 50vh !important;
+  border-radius: 20px !important;
+}
 
   .special-font b {
     font-family: "Zentry";
