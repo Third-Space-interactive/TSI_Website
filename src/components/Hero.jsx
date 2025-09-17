@@ -1,7 +1,6 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom"; // Add this import
 import Button from "./Button.jsx";
 import { TiLocation, TiLocationArrow } from "react-icons/ti";
 import { ScrollTrigger } from "gsap/all";
@@ -9,7 +8,6 @@ import { ScrollTrigger } from "gsap/all";
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
-    const location = useLocation(); // Add this
     const [currentIndex, setCurrentIndex] = useState(1)
     const [hasClicked, setHasClicked] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
@@ -18,48 +16,6 @@ const Hero = () => {
 
     const totalVideos = 3;
     const nextVideoRef = useRef(null);
-
-    // Reset component state when returning to home page
-    useEffect(() => {
-        if (location.pathname === '/') {
-            setCurrentIndex(1);
-            setHasClicked(false);
-            setIsLoading(true);
-            setLoadedVideos(0);
-            
-            // Kill all existing ScrollTriggers to prevent conflicts
-            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-            
-            // Reset GSAP transforms on mini preview
-            const miniPreview = document.querySelector('.mask-clip-path');
-            if (miniPreview) {
-                gsap.set(miniPreview, {
-                    clearProps: "all"
-                });
-                
-                const previewContent = miniPreview.querySelector('div');
-                if (previewContent) {
-                    gsap.set(previewContent, {
-                        clearProps: "all",
-                        scale: 0.5,
-                        opacity: 0
-                    });
-                }
-            }
-            
-            // Reset next video
-            const nextVideo = document.getElementById('next-video');
-            if (nextVideo) {
-                gsap.set(nextVideo, {
-                    clearProps: "all",
-                    visibility: 'hidden',
-                    scale: 1,
-                    width: '16rem',
-                    height: '16rem'
-                });
-            }
-        }
-    }, [location.pathname]);
 
     // Detect mobile devices
     useEffect(() => {
@@ -79,6 +35,7 @@ const Hero = () => {
     }
 
     const handleImageLoad = () => {
+        // For mobile, we'll consider images as "loaded videos" for the loading state
         setLoadedVideos((prev) => prev + 1);
     }
 
@@ -87,12 +44,16 @@ const Hero = () => {
         if (!isMobile) {
             setHasClicked(true);
             setCurrentIndex(upcomingVideoIndex);
-        } else {
+        }
+        // On mobile, clicking just cycles the background image
+        else {
             setCurrentIndex(upcomingVideoIndex);
         }
     };
 
     useEffect(() => {
+        // On mobile, we only need to load 2 images (main + mini preview)
+        // On desktop, we need to load 3 videos but check for totalVideos - 1
         const requiredLoads = isMobile ? 2 : totalVideos - 1;
         
         if(loadedVideos >= requiredLoads) {
@@ -100,24 +61,28 @@ const Hero = () => {
         }
     }, [loadedVideos, isMobile])
 
+    // Force loading to false after a timeout to prevent infinite loading
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (isLoading) {
                 console.log('Force removing loading screen after timeout');
                 setIsLoading(false);
             }
-        }, 5000);
+        }, 5000); // 5 second timeout
 
         return () => clearTimeout(timeout);
     }, [isLoading])
 
-    // Enhanced cleanup and reset for page navigation
+    // Solution 3: Force animation on component focus (failsafe for edge cases)
     useEffect(() => {
         const heroElement = document.querySelector('.hero-text-content');
-        if (heroElement && location.pathname === '/') {
+        if (heroElement) {
+            // Force scroll trigger refresh and restart animations
             ScrollTrigger.refresh();
             
+            // Small delay to ensure DOM is ready
             const timeout = setTimeout(() => {
+                // Check if text elements are still hidden (edge case detection)
                 const titleElement = document.querySelector('.hero-title');
                 const isHidden = titleElement && (
                     window.getComputedStyle(titleElement).opacity === '0' ||
@@ -127,6 +92,7 @@ const Hero = () => {
                 if (isHidden) {
                     console.log('Failsafe: Manually triggering hero text animations');
                     
+                    // Manually restart the text animations as failsafe
                     gsap.set(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
                         y: 100,
                         opacity: 0
@@ -147,20 +113,23 @@ const Hero = () => {
         }
     }, [location.pathname])
 
+    // Additional failsafe: Force animation when scrolled to top
     useEffect(() => {
         const handleScrollToTop = () => {
-            if (window.scrollY === 0 && location.pathname === '/') {
+            if (window.scrollY === 0) {
                 const timeout = setTimeout(() => {
                     const titleElement = document.querySelector('.hero-title');
                     if (titleElement && window.getComputedStyle(titleElement).opacity === '0') {
                         console.log('Logo click failsafe: Forcing hero animations');
                         
+                        // Kill existing ScrollTriggers to avoid conflicts
                         ScrollTrigger.getAll().forEach(trigger => {
                             if (trigger.vars && trigger.vars.trigger === '.hero-text-content') {
                                 trigger.kill();
                             }
                         });
                         
+                        // Force immediate animation
                         gsap.set(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
                             y: 0,
                             opacity: 1
@@ -172,7 +141,9 @@ const Hero = () => {
             }
         };
 
+        // Listen for scroll events
         window.addEventListener('scroll', handleScrollToTop);
+        // Also check immediately in case we're already at top
         handleScrollToTop();
 
         return () => window.removeEventListener('scroll', handleScrollToTop);
@@ -201,16 +172,6 @@ const Hero = () => {
     },{dependencies:[currentIndex], revertOnUpdate: true})
 
     useGSAP(() => {
-        // Clear any existing animations first
-        ScrollTrigger.getAll().forEach(trigger => {
-            if (trigger.vars && (
-                trigger.vars.trigger === '#video-frame' || 
-                trigger.vars.trigger === '.hero-text-content'
-            )) {
-                trigger.kill();
-            }
-        });
-
         gsap.set('#video-frame', {
             clipPath: 'polygon(14% 0%, 72% 0%, 90% 90%, 0% 100%)',
             borderRadius: '0 0 40% 10%'
@@ -228,12 +189,14 @@ const Hero = () => {
             }
         })
 
+        // Reset and set initial state for text elements
         const resetAndAnimate = () => {
             gsap.set(['.hero-title', '.hero-subtitle', '.hero-button', '.hero-corner-text'], {
                 y: 100,
                 opacity: 0
             });
 
+            // Text animation timeline for entry
             const textTimeline = gsap.timeline({
                 scrollTrigger: {
                     trigger: '.hero-text-content',
@@ -241,29 +204,34 @@ const Hero = () => {
                     end: 'bottom top',
                     toggleActions: 'play none none reverse',
                     onEnter: () => {
+                        // Force animation to play when entering
                         textTimeline.restart();
                     }
                 }
             });
 
+            // Animate main title
             textTimeline.to('.hero-title', {
                 y: 0,
                 opacity: 1,
                 duration: 1,
                 ease: 'power2.out',
             })
+            // Animate subtitle
             .to('.hero-subtitle', {
                 y: 0,
                 opacity: 1,
                 duration: 0.8,
                 ease: 'power2.out',
             }, '-=0.6')
+            // Animate button
             .to('.hero-button', {
                 y: 0,
                 opacity: 1,
                 duration: 0.6,
                 ease: 'power2.out',
             }, '-=0.4')
+            // Animate corner text
             .to('.hero-corner-text', {
                 y: 0,
                 opacity: 1,
@@ -271,6 +239,7 @@ const Hero = () => {
                 ease: 'power2.out',
             }, '-=0.4');
 
+            // Exit animation
             const exitTimeline = gsap.timeline({
                 scrollTrigger: {
                     trigger: '.hero-text-content',
@@ -303,19 +272,7 @@ const Hero = () => {
         };
 
         resetAndAnimate();
-
-        // Cleanup function
-        return () => {
-            ScrollTrigger.getAll().forEach(trigger => {
-                if (trigger.vars && (
-                    trigger.vars.trigger === '#video-frame' || 
-                    trigger.vars.trigger === '.hero-text-content'
-                )) {
-                    trigger.kill();
-                }
-            });
-        };
-    }, [location.pathname]) // Add location.pathname as dependency
+    }, [location.pathname])
 
     const getVideoSource = (index) => `videos/hero-${index}.mp4`;
     const getMobileImageSource = (index) => `img/hero-${index}-mobile.webp`;
@@ -353,8 +310,8 @@ const Hero = () => {
                         ) : (
                             <video
                                 ref={nextVideoRef}
-                                src={getVideoSource(upcomingVideoIndex)}
-                                poster={getPosterSource(upcomingVideoIndex)}
+                                src={getMobileImageSource(upcomingVideoIndex)}
+                                poster={getMobileImageSource(upcomingVideoIndex)}
                                 loop
                                 muted
                                 playsInline
