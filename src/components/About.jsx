@@ -27,18 +27,22 @@ const About = () => {
   });
 
   return (
-    <div className="min-h-screen w-screen">
-      <div className="relative mb-8 flex flex-col items-center gap-5">
+    <div id="about" className="min-h-screen w-screen">
+      <div className="relative mb-8 mt-36 flex flex-col items-center gap-5">
+        <p className="font-general text-sm uppercase md:text-[10px]">
+          Welcome to Zentry
+        </p>
 
         <AnimatedTitle
           title="Show c<b>o</b>mmunities the future - <br/> and <b>b</b>ring them on board"
           containerClass="mt-5 !text-black text-center"
         />
 
-        <div className="about-subtext -my-10 sm:my-10">
+        <div className="about-subtext">
           <p>Spark excitement, build trust, and gain support for your projects.</p>
           <p className="text-gray-500">
             Our real-time visual experiences make it easy for communities and stakeholders to explore, connect with, and believe in your vision.
+
           </p>
         </div>
       </div>
