@@ -8,6 +8,7 @@ import BentoCard from "./BentoCard";
 import { BentoTilt } from "./Projects";
 import Button from "./Button.jsx";
 import AnimatedTitle from "./AnimatedTitle";
+import Scroll from "./Scroll.jsx";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -243,7 +244,16 @@ const projectData = {
     aboutText: "1700 Spot is a multifunctional public space co-designed with the Russell Heights community to promote youth mental health and well-being. Developed through a collaboration between community organizations and Carleton Architecture students, the space features a gathering zone, an outdoor cinema, and a gym. From the early stages of consultation, 3D visualizations proved especially engaging for the community- particularly the youth - who were excited to see representations of the spaces they helped shape.",
     aboutImage: "/img/russell-deployment.webp",
     featureTitle: "Interactive Community Engagement",
-    featureDescription: "By deploying 1700 Spot through our custom web streaming service, we eliminated barriers and invited the entire community into the design process. Powered by AWS infrastructure, residents could explore, interact, and shape their neighborhood's vision from any device-turning community consultation into a shared adventure that sparked real enthusiasm and collective ownership.",
+    featureDescription: "By deploying 1700 Spot through our custom web streaming service, we eliminated barriers and invited the entire community into the design process. This allowed residents to explore, interact, and shape their neighborhood's vision from any device-turning community consultation into a shared adventure that sparked real enthusiasm and collective ownership.",
+    
+    // New Scroll component props
+    scrollParallaxImages: [
+      "/img/Russell-Heights/rh_features-1-mobile.webp",
+      "/img/Russell-Heights/rh_features-2-mobile.webp", // Convert from video to image
+      "/img/Russell-Heights/rh_features-3-mobile.webp", // Convert from video to image
+      "/img/Russell-Heights/rh_features-4-mobile.webp",  // Convert from video to image
+    ],
+    
     bentoItems: [
       {
         src: "/videos/Russell-Heights/rh_features-2.mp4",
@@ -291,11 +301,21 @@ const projectData = {
     title: "Shoquba",
     heroImage: "/videos/shoquba-1.mp4",
     description: "Shoquba is a real-estate platform allowing users to choose and customize their retail spaces before its built - all within a fully interactive 3D environment.",
-    aboutTitle: 'Russell Heights',
+    aboutTitle: 'Retail Space <br/> Reimagined',
     aboutText: "Shoquba revolutionizes retail space planning by putting the power of customization directly into the hands of future tenants. Our platform combines advanced 3D visualization with intuitive design tools, allowing users to experiment with layouts, materials, lighting, and branding elements in real-time. This approach reduces uncertainty, accelerates decision-making, and ensures that retail spaces are perfectly tailored to each business's unique needs before construction begins.",
     aboutImage: "/img/project-about-2.jpg",
     featureTitle: "Customize Before You Build",
     featureDescription: "Design and visualize your perfect retail space with real-time 3D customization tools that bring your vision to life before construction begins.",
+    
+    // New Scroll component props for Shoquba
+
+    scrollParallaxImages: [
+      "/img/Russell-Heights/rh_features-1-mobile.webp",
+      "/img/shoquba-detail-1.jpg", // You'll need to add these images
+      "/img/shoquba-detail-2.jpg",
+      "/img/shoquba-detail-3.jpg"
+    ],
+    
     bentoItems: [
       {
         src: "/videos/shoquba-feature-1.mp4",
@@ -583,61 +603,13 @@ const ProjectPage = () => {
           </div>
         </div>
       </div>
-      
-
-      {/* About Project Section */}
-      <section id="about-project" className="min-h-screen w-screen">
-        <div className="relative mb-8 mt-36 flex flex-col items-center gap-5">
-          <div className="text-center">
-            <AnimatedTitle
-              title={project.aboutTitle}
-              containerClass="mt-5 !text-black text-center"
-            />  
-            {/* Replace static text with animated text component */}
-            <div className="leading-relaxed max-w-4xl mx-auto mt-4">
-              <AnimatedText 
-                text={project.aboutText}
-                className="font-robert-regular text-lg text-blue-75 opacity-80"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Clip Animation Section - Following About.jsx structure */}
-        <div className="h-dvh w-screen" id="about-clip">
-          <div className="mask-clip-path about-image">
-            <img
-              src={project.aboutImage}
-              alt={`${project.title} project details`}
-              className="absolute left-0 top-0 size-full object-cover"
-              onError={(e) => {
-                console.error('Failed to load about image:', project.aboutImage);
-                e.target.style.display = 'none';
-              }}
-            />
-            
-            {/* Black to transparent gradient overlay from top to center */}
-            <div className="absolute left-0 top-0 w-full h-1/2 bg-gradient-to-b from-black/60 to-transparent pointer-events-none"></div>
-            
-            {/* Feature Text Overlay */}
-            <div className="feature-overlay absolute left-0 top-0 z-40 size-full">
-              <AnimatedTitle
-              title={project.featureTitle}
-              containerClass="mt-5 !text-white text-center"
-            />  
-
-                <div className="leading-relaxed max-w-4xl mx-auto mt-4">
-                <AnimatedText 
-                text={project.featureDescription}
-                className="font-robert-regular text-lg text-white"
-                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}
-              />
-
-                </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Scroll 
+        sectionId="about-project"
+        featuresTitle={project.featureTitle}
+        featuresDescription={project.featureDescription}
+        centerImage={project.aboutImage}
+        parallaxImages={project.scrollParallaxImages}
+      />
       </main>
 
       {/* Project Features Bento Grid */}
