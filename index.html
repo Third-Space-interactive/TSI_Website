@@ -2,24 +2,206 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Light mode favicon -->
-    <link rel="icon" href="img/Icon-black.svg" media="(prefers-color-scheme: light)">
-    <!-- Dark mode favicon -->
-    <link rel="icon" href="img/Icon-white.svg" media="(prefers-color-scheme: dark)">
+    
+    <!-- Performance Optimizations -->
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.cdnfonts.com">
+    <link rel="dns-prefetch" href="https://fonts.cdnfonts.com">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="/fonts/general.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/zentry-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/circularweb-book.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/robert-regular.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Preload critical images -->
+    <link rel="preload" href="/img/hero-1-mobile.webp" as="image" type="image/webp">
+    <link rel="preload" href="/img/logo.png" as="image" type="image/png">
+    
+    <!-- Basic Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Third Space Interactive</title>
-    <!-- Google tag (gtag.js) -->
+    <meta name="description" content="Third Space Interactive is an architectural visualization studio specializing in extended reality (XR) applications built in Unreal Engine. We create interactive experiences for real estate, community consultation, and storytelling." />
+    <meta name="keywords" content="architectural visualization, XR, VR, AR, Unreal Engine, real estate visualization, community consultation, interactive 3D, archviz, virtual reality, extended reality" />
+    <meta name="author" content="Third Space Interactive" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#5d3fd3" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://thirdspaceinteractive.ca/" />
+    <meta property="og:title" content="Third Space Interactive - Architectural Visualization & XR Studio" />
+    <meta property="og:description" content="Where game-engine visualization meets architectural realization. We create interactive 3D experiences for real estate, community consultation, and storytelling using Unreal Engine." />
+    <meta property="og:image" content="https://thirdspaceinteractive.ca/img/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Third Space Interactive - Interactive architectural visualization" />
+    <meta property="og:site_name" content="Third Space Interactive" />
+    <meta property="og:locale" content="en_CA" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://thirdspaceinteractive.ca/" />
+    <meta name="twitter:title" content="Third Space Interactive - Architectural Visualization & XR Studio" />
+    <meta name="twitter:description" content="Where game-engine visualization meets architectural realization. Interactive 3D experiences using Unreal Engine." />
+    <meta name="twitter:image" content="https://thirdspaceinteractive.ca/img/twitter-card.jpg" />
+    <meta name="twitter:image:alt" content="Third Space Interactive - Interactive architectural visualization" />
+    <meta name="twitter:creator" content="@thirdspaceint" />
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Third Space Interactive",
+      "url": "https://thirdspaceinteractive.ca",
+      "logo": "https://thirdspaceinteractive.ca/img/logo.png",
+      "description": "Architectural visualization studio specializing in extended reality (XR) applications built in Unreal Engine",
+      "foundingDate": "2020",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CA"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "thirdspaceinteractive@gmail.com"
+      },
+      "sameAs": [
+        "https://www.instagram.com/merchant_designs/",
+        "https://www.youtube.com/@MerchantDesigns",
+        "https://github.com/ArkounM"
+      ],
+      "serviceType": [
+        "Architectural Visualization",
+        "Virtual Reality Development",
+        "Augmented Reality Development",
+        "3D Modeling",
+        "Interactive Design",
+        "Real Estate Visualization"
+      ],
+      "areaServed": {
+        "@type": "Country",
+        "name": "Canada"
+      }
+    }
+    </script>
+    
+    <!-- Additional Structured Data for Business -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "Third Space Interactive",
+      "description": "We create interactive experiences for real estate, community consultation, and storytelling that transform static proposals into playable, explorable spaces",
+      "url": "https://thirdspaceinteractive.ca",
+      "serviceType": "Architectural Visualization Services",
+      "areaServed": "Canada",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Visualization Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "XR Development",
+              "description": "Extended reality applications for architectural visualization"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "VR Experiences",
+              "description": "Virtual reality solutions for real estate and community consultation"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Interactive 3D Deployment",
+              "description": "Web-based interactive 3D experiences accessible on any device"
+            }
+          }
+        ]
+      }
+    }
+    </script>
+    
+    <!-- Favicons -->
+    <!-- High-res favicon for modern browsers -->
+    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg" />
+    <!-- Fallback PNG favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png" />
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png" />
+    <!-- Android Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/img/android-chrome-512x512.png" />
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://thirdspaceinteractive.ca/" />
+    
+    <title>Third Space Interactive - Architectural Visualization & XR Studio | Interactive 3D Experiences</title>
+    
+    <!-- Google Analytics (Optimized) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0038E8G1VZ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
-      gtag('config', 'G-0038E8G1VZ');
-</script>
+      gtag('config', 'G-0038E8G1VZ', {
+        page_title: 'Third Space Interactive - Home',
+        page_location: window.location.href
+      });
+    </script>
+    
+    <!-- Critical CSS Inlined (Add your most critical styles here) -->
+    <style>
+      /* Critical above-the-fold styles */
+      body { 
+        margin: 0; 
+        font-family: "General Sans", sans-serif; 
+        background-color: #dfdff0;
+        overflow-x: hidden;
+      }
+      .loading-screen { 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        background: #dfdff0; 
+        z-index: 9999; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+      }
+    </style>
   </head>
   <body>
+    <!-- Loading screen to prevent layout shift -->
+    <div id="loading-screen" class="loading-screen">
+      <div>Loading...</div>
+    </div>
+    
     <div id="root"></div>
+    
+    <!-- Remove loading screen once React loads -->
+    <script>
+      window.addEventListener('load', function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.display = 'none';
+        }
+      });
+    </script>
+    
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

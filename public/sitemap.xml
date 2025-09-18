@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://thirdspaceinteractive.ca/</loc>
+    <lastmod>2025-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://thirdspaceinteractive.ca/img/hero-1-mobile.webp</image:loc>
+      <image:caption>Third Space Interactive - Architectural Visualization</image:caption>
+      <image:title>Interactive 3D Architectural Experiences</image:title>
+    </image:image>
+  </url>
+  
+  <!-- Project Pages -->
+  <url>
+    <loc>https://thirdspaceinteractive.ca/project/1700-spot</loc>
+    <lastmod>2025-09-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://thirdspaceinteractive.ca/img/Russell-Heights/rh_features-1-mobile.webp</image:loc>
+      <image:caption>1700 Spot - Interactive Community Consultation Platform</image:caption>
+      <image:title>1700 Spot Community Engagement Project</image:title>
+    </image:image>
+  </url>
+  
+  <url>
+    <loc>https://thirdspaceinteractive.ca/project/shoquba</loc>
+    <lastmod>2025-09-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://thirdspaceinteractive.ca/videos/hero-3.mp4</image:loc>
+      <image:caption>Shoquba - Real Estate Visualization Platform</image:caption>
+      <image:title>Shoquba Interactive Retail Space Design</image:title>
+    </image:image>
+  </url>
+  
+  <!-- Add more project URLs as you create them -->
+  
+</urlset>
